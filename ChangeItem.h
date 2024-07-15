@@ -10,7 +10,7 @@
 #ifndef CHANGE_ITEM
 #define CHANGE_ITEM
 
-#include <string>
+#include <cstring>
 #include <fstream>
 using namespace std;
 
@@ -21,38 +21,36 @@ class ChangeItem
 public:
     // Default Constructor
     ChangeItem()
-        : changeID(0), productName(""), anticipatedRelease(""),
-          description(""), state(""), priority(0) {}
+        : changeID(0), productName("\0"), anticipatedRelease("\0"),
+          description("\0"), state("\0"), priority(0) {}
 
     // Constructor
-    ChangeItem(const string &name, const string &rID, const string &desc, const string &st,
-               const int &prio);
+    ChangeItem(const char *name, const char *rID, const char *desc, const char *state, int prio);
 
     // Manually add a change id (for testing purposes)
-    ChangeItem(const int &cID, const string &name, const string &rID, const string &desc, const string &st,
-               const int &prio);
+    ChangeItem(int cID, const char *name, const char *rID, const char *desc, const char *state, int prio);
 
     // Getters
     int getChangeID();
-    string getProductName();
-    string getReleaseID();
-    string getDescription();
-    string getStatus();
+    void getProductName(char *str);
+    void getReleaseID(char *str);
+    void getDescription(char *str);
+    void getStatus(char *str);
     int getPriority();
 
     // Setters
-    void setProductName(string &name);
-    void setReleaseID(string &releaseID);
-    void setDescription(string &description);
-    void setStatus(string &status);
-    void setPriority(int priority);
+    void setProductName(const char *name);
+    void setReleaseID(const char *id);
+    void setDescription(const char *desc);
+    void setStatus(const char *st);
+    void setPriority(int prio);
 
 private:
     int changeID;
-    string productName;
-    string anticipatedRelease;
-    string description;
-    string state;
+    char productName[11]; // 1 extra character for null-terminating char
+    char anticipatedRelease[9];
+    char description[31];
+    char state[11];
     int priority;
 };
 // This class models a ChangeItem entity.
@@ -65,6 +63,9 @@ private:
 class ChangeItemFile
 {
 public:
+    // Constructor
+    ChangeItemFile() {}
+
     ChangeItem findChangeItem(int id);
     bool seekToBeginningOfFile();
     bool getNextChangeItem(ChangeItem &changeItemObj);
@@ -76,9 +77,10 @@ public:
     bool closeChangeItemFile();
 
 private:
-    fstream file;
+    fstream fileStream;
     bool writeChangeItem(ChangeItem changeItemObj);
 };
+
 // This class handles the reading and writing of ChangeItem objects to and from a file.
 // You can find a specific ChangeItem through the findChangeItem function by giving it a Change Id
 // Use writeChangeItem to write the ChangeItem object to disk. It will append the object at the end of the file.
