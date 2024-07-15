@@ -16,13 +16,22 @@ using namespace std;
 
 //*******************************************************//
 
+enum class State
+{
+    REPORTED,
+    ASSESSED,
+    IN_PROGRESS,
+    CANCELLED,
+    DONE
+};
+
 class ChangeItem
 {
 public:
     // Default Constructor
     ChangeItem()
         : changeID(0), productName(""), anticipatedRelease(""),
-          description(""), state(""), priority(0) {}
+          description(""), state(State::REPORTED), priority(0) {}
 
     // Constructor
     ChangeItem(const string &name, const string &rID, const string &desc, const string &st,
@@ -34,25 +43,25 @@ public:
 
     // Getters
     int getChangeID();
-    string getProductName();
-    string getReleaseID();
-    string getDescription();
-    string getStatus();
+    void getProductName(char *str);
+    void getReleaseID(char *str);
+    void getDescription(char *str);
+    void getStatus(char *str); // returns a string of the status
     int getPriority();
 
     // Setters
-    void setProductName(string &name);
-    void setReleaseID(string &releaseID);
-    void setDescription(string &description);
-    void setStatus(string &status);
+    void setProductName(char *name);
+    void setReleaseID(char *release_id);
+    void setDescription(char *description);
+    void setStatus(State state);
     void setPriority(int priority);
 
 private:
     int changeID;
-    string productName;
-    string anticipatedRelease;
-    string description;
-    string state;
+    char productName[30];       // Example size, adjust as needed
+    char anticipatedRelease[8]; // Example size, adjust as needed
+    char description[30];       // Example size, adjust as needed
+    State state;
     int priority;
 };
 // This class models a ChangeItem entity.
