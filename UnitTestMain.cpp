@@ -13,7 +13,7 @@
 //*******************************************************//
 
 #include <iostream>
-#include <string>
+#include <cstring>
 #include "ChangeItem.h"
 
 using namespace std;
@@ -58,10 +58,9 @@ void testUpdatingChangeItem()
   file.createChangeItem(item);
 
   // Update new Change Item (reads, then saves to disk)
-  ChangeItem item = file.findChangeItem(1);
-  string status = "Assessed";
-  item.setStatus(status);
-  file.updateChangeItem(item);
+  ChangeItem item2 = file.findChangeItem(1);
+  item2.setStatus("Assessed");
+  file.updateChangeItem(item2);
 
   // Get updated Change Item from disk
   ChangeItem createdChangeItem = file.findChangeItem(2);
@@ -91,27 +90,47 @@ void assertChangeItem(string testName, ChangeItem &expected, ChangeItem &actual)
     pass = false;
   }
 
-  if (actual.getProductName() != expected.getProductName())
+  char actualProductName[11];
+  char expectedProductName[11];
+  actual.getProductName(actualProductName);
+  expected.getProductName(expectedProductName);
+
+  if (strcmp(actualProductName, expectedProductName) != 0)
   {
-    std::cout << testName << " failed. Product Name mismatch. Expected: " << expected.getProductName() << ", Actual: " << actual.getProductName() << std::endl;
+    cout << testName << " failed. Product Name mismatch. Expected: " << expectedProductName << ", Actual: " << actualProductName << std::endl;
     pass = false;
   }
 
-  if (actual.getReleaseID() != expected.getReleaseID())
+  char actualReleaseID[9];
+  char expectedReleaseID[9];
+  actual.getReleaseID(actualReleaseID);
+  expected.getReleaseID(expectedReleaseID);
+
+  if (strcmp(actualReleaseID, expectedReleaseID) != 0)
   {
-    std::cout << testName << " failed: Release ID mismatch. Expected: " << expected.getReleaseID() << ", Actual: " << actual.getReleaseID() << std::endl;
+    cout << testName << " failed: Release ID mismatch. Expected: " << expectedReleaseID << ", Actual: " << actualReleaseID << std::endl;
     pass = false;
   }
 
-  if (actual.getDescription() != expected.getDescription())
+  char actualDescription[31];
+  char expectedDescription[31];
+  actual.getDescription(actualDescription);
+  expected.getDescription(expectedDescription);
+
+  if (strcmp(actualDescription, expectedDescription) != 0)
   {
-    std::cout << testName << " failed: Description mismatch. Expected: " << expected.getDescription() << ", Actual: " << actual.getDescription() << std::endl;
+    cout << testName << " failed: Description mismatch. Expected: " << expectedDescription << ", Actual: " << actualDescription << std::endl;
     pass = false;
   }
 
-  if (actual.getStatus() != expected.getStatus())
+  char actualState[11];
+  char expectedState[11];
+  actual.getStatus(actualState);
+  expected.getStatus(expectedDescription);
+
+  if (strcmp(actualState, expectedState) != 0)
   {
-    std::cout << testName << " failed: Status mismatch. Expected: " << expected.getStatus() << ", Actual: " << actual.getStatus() << std::endl;
+    cout << testName << " failed: Status mismatch. Expected: " << expectedState << ", Actual: " << actualState << std::endl;
     pass = false;
   }
 
