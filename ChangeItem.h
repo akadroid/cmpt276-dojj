@@ -17,6 +17,15 @@ using namespace std;
 
 //*******************************************************//
 
+enum class State
+{
+    REPORTED,
+    ASSESSED,
+    IN_PROGRESS,
+    CANCELLED,
+    DONE
+};
+
 class ChangeItem
 {
 public:
