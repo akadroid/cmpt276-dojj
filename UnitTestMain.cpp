@@ -15,7 +15,7 @@
 #include <iostream>
 #include <cstring>
 #include "ChangeItem.h"
-#include "BinaryFileIOHelper.cpp"
+#include "BinaryFileIOHelper.h"
 
 using namespace std;
 void assertChangeItem(string testName, ChangeItem &expected, ChangeItem &actual);
@@ -36,7 +36,8 @@ void testCreatingChangeItem()
   file.createChangeItem(item);
 
   // Get Change Item from disk
-  ChangeItem createdChangeItem = file.findChangeItem(1);
+  ChangeItem createdChangeItem;
+  file.findChangeItem(1, createdChangeItem);
 
   // Test the Change Item
   ChangeItem expectedChangeItem(1, "Test Product", "V1", "Not working", "none", 5);
@@ -59,12 +60,14 @@ void testUpdatingChangeItem()
   file.createChangeItem(item);
 
   // Update new Change Item (reads, then saves to disk)
-  ChangeItem item2 = file.findChangeItem(1);
+  ChangeItem item2;
+  file.findChangeItem(1, item2);
   item2.setStatus("Assessed");
   file.updateChangeItem(item, item2);
 
   // Get updated Change Item from disk
-  ChangeItem createdChangeItem = file.findChangeItem(2);
+  ChangeItem createdChangeItem;
+  file.findChangeItem(2, createdChangeItem);
 
   // Test the updated Change Item
   ChangeItem testChangeItem(2, "Test Product", "V2", "Crashes", "Assessed", 1);

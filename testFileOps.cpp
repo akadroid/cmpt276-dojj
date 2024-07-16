@@ -2,13 +2,11 @@
 // Rev. 2 - 15/07/24 Original by D.O.J.J Software Development
 
 //*******************************************************//
-// This module is designed to test the file operations of Change Item
-// The testCreatingChangeItem function calls createChangeItem to save
-// a Change Item to the disk, and then retrieves it from disk using a ChangeItemFile object.
-// It will then compare the retrieved object with another object with expected results.
-// The testUpdatingChangeItem function will first create a new ChangeItem object,
-// then modify it, and then call the updateChangeItem function to save it to disk.
-// The program will notify the user of failed test cases.
+// This module is designed to test the writing and reading of binary records
+// for ChangeItem objects to the file named "ChangeItems.data".
+// The testBinaryFileIO function creates a ChangeItem object, writes it to disk,
+// then reads it back from disk, and compares the retrieved object with the expected object.
+// The program will notify the user of failed test cases through the assertChangeItem function.
 //*******************************************************//
 
 #include <iostream>
@@ -22,9 +20,9 @@ void assertChangeItem(string testName, ChangeItem &expected, ChangeItem &actual)
 
 // Name of test: Testing writing and reading binary records of ChangeItem class
 // Type: Functional Test
-// Preconditions: No other ChangeItem record exists, must be from clean start
+// Preconditions: No other ChangeItem record exists, no ChangeItems.data exists, must be from a clean start
 // Steps: run the program
-// Expected results: Program says "Updating change item passed."
+// Expected results: Program says "Testing writing and reading of ChangeItem class passed."
 
 void testBinaryFileIO()
 {
