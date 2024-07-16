@@ -1,10 +1,20 @@
+// ChangeItem.cpp
+// Rev. 2 - 15/07/24 Original by D.O.J.J Software Development
+
+//*******************************************************//
+// This module implements the ChangeItem class and the ChangeItemFile class,
+// that was designed in the ChangeItem.h header file. It provides functionality
+// to create, read, update, and search for ChangeItem records stored in a binary file.
+//*******************************************************//
+
 #include "ChangeItem.h"
 #include "BinaryFileIOHelper.h"
 #include <iostream>
+using namespace std;
 
-// File to hold Change IDs
+//*******************************************************//
 
-static int next_id()
+int next_id()
 {
   int id = 0;
 
@@ -14,6 +24,9 @@ static int next_id()
   ofstream("changeId.txt") << id;
   return id;
 }
+// Function to generate the next change ID
+
+//*******************************************************//
 
 ChangeItem::ChangeItem(const char *name, const char *rID, const char *desc, const char *state, int prio)
     : priority(prio)
@@ -25,6 +38,8 @@ ChangeItem::ChangeItem(const char *name, const char *rID, const char *desc, cons
   setStatus(state);
 }
 
+//*******************************************************//
+
 ChangeItem::ChangeItem(int cID, const char *name, const char *rID, const char *desc, const char *state, int prio)
     : changeID(cID), priority(prio)
 {
@@ -34,43 +49,57 @@ ChangeItem::ChangeItem(int cID, const char *name, const char *rID, const char *d
   setStatus(state);
 }
 
+//*******************************************************//
+
 int ChangeItem::getChangeID()
 {
   return changeID;
 }
 
-// Pass in a char buffer of size 11
+//*******************************************************//
+
 void ChangeItem::getProductName(char *str)
 {
   strncpy(str, productName, sizeof(productName));
   str[sizeof(productName) - 1] = '\0';
 }
+// Pass in a char buffer of size 11
 
-// Pass in a char buffer of size 9
+//*******************************************************//
+
 void ChangeItem::getReleaseID(char *str)
 {
   strncpy(str, anticipatedRelease, sizeof(anticipatedRelease));
   str[sizeof(anticipatedRelease) - 1] = '\0';
 }
+// Pass in a char buffer of size 9
 
-// Pass in a char buffer of size 31
+//*******************************************************//
+
 void ChangeItem::getDescription(char *str)
 {
   strncpy(str, description, sizeof(description));
   str[sizeof(description) - 1] = '\0';
 }
+// Pass in a char buffer of size 31
 
-// Pass in a char buffer of size 11
+//*******************************************************//
+
 void ChangeItem::getStatus(char *str)
 {
   strncpy(str, state, sizeof(state));
   str[sizeof(state) - 1] = '\0';
 }
+// Pass in a char buffer of size 11
+
+//*******************************************************//
 
 int ChangeItem::getPriority()
 {
   return priority;
 }
+
+//*******************************************************//
 
 void ChangeItem::setProductName(const char *name)
 {
@@ -78,11 +107,15 @@ void ChangeItem::setProductName(const char *name)
   productName[sizeof(productName) - 1] = '\0';
 }
 
+//*******************************************************//
+
 void ChangeItem::setReleaseID(const char *id)
 {
   strncpy(anticipatedRelease, id, sizeof(anticipatedRelease));
   anticipatedRelease[sizeof(anticipatedRelease) - 1] = '\0';
 }
+
+//*******************************************************//
 
 void ChangeItem::setDescription(const char *desc)
 {
@@ -90,21 +123,29 @@ void ChangeItem::setDescription(const char *desc)
   description[sizeof(description) - 1] = '\0';
 }
 
+//*******************************************************//
+
 void ChangeItem::setStatus(const char *st)
 {
   strncpy(state, st, sizeof(state));
   state[sizeof(state) - 1] = '\0';
 }
 
+//*******************************************************//
+
 void ChangeItem::setPriority(int prio)
 {
   priority = prio;
 }
 
+//*******************************************************//
+
 ChangeItemFile::ChangeItemFile()
 {
   openChangeItemFile();
 }
+
+//*******************************************************//
 
 bool ChangeItemFile::findChangeItem(int id, ChangeItem &item)
 {
@@ -129,6 +170,8 @@ bool ChangeItemFile::findChangeItem(int id, ChangeItem &item)
   return false;
 }
 
+//*******************************************************//
+
 bool ChangeItemFile::seekToBeginningOfFile()
 {
   if (!file.is_open())
@@ -140,15 +183,21 @@ bool ChangeItemFile::seekToBeginningOfFile()
   return file.good(); // Returns true if the seek was successful
 }
 
+//*******************************************************//
+
 bool ChangeItemFile::getNextChangeItem(ChangeItem &changeItemObj)
 {
   return Read(changeItemObj);
 }
 
+//*******************************************************//
+
 bool ChangeItemFile::createChangeItem(ChangeItem &aChangeItem)
 {
   return Write(aChangeItem);
 }
+
+//*******************************************************//
 
 bool ChangeItemFile::updateChangeItem(ChangeItem &oldChangeItem, ChangeItem &newChangeItem)
 {
@@ -185,6 +234,8 @@ bool ChangeItemFile::updateChangeItem(ChangeItem &oldChangeItem, ChangeItem &new
   return false;
 }
 
+//*******************************************************//
+
 void ChangeItemFile::searchChangeItem(int changeId)
 {
   ChangeItem buf;
@@ -216,6 +267,8 @@ void ChangeItemFile::searchChangeItem(int changeId)
   }
 }
 
+//*******************************************************//
+
 bool ChangeItemFile::openChangeItemFile()
 {
   file.open("ChangeItems.data", ios::in | ios::out | ios::binary | ios::app);
@@ -226,6 +279,8 @@ bool ChangeItemFile::openChangeItemFile()
   }
   return true;
 }
+
+//*******************************************************//
 
 bool ChangeItemFile::closeChangeItemFile()
 {
@@ -245,6 +300,8 @@ bool ChangeItemFile::writeChangeItem(ChangeItem changeItemObj)
   Write(changeItemObj);
 }
 
+//*******************************************************//
+
 ChangeItemFile strtItem()
 {
   // changeIdFile.open("changeId.txt", fstream::in | fstream::out | std::ios::app);
@@ -255,3 +312,5 @@ bool closeItem(ChangeItemFile &itemFile)
 {
   return itemFile.closeChangeItemFile();
 }
+
+//*******************************************************//
