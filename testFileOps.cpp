@@ -1,9 +1,8 @@
-// UnitTestMain.cpp
+// testFileOps.cpp
 // Rev. 2 - 15/07/24 Original by D.O.J.J Software Development
 
 //*******************************************************//
-// This module is designed to test the creation and retrieval of ChangeItem objects
-// within the system.
+// This module is designed to test the file operations of Change Item
 // The testCreatingChangeItem function calls createChangeItem to save
 // a Change Item to the disk, and then retrieves it from disk using a ChangeItemFile object.
 // It will then compare the retrieved object with another object with expected results.
@@ -15,68 +14,56 @@
 #include <iostream>
 #include <cstring>
 #include "ChangeItem.h"
-#include "BinaryFileIOHelper.cpp"
 
 using namespace std;
 void assertChangeItem(string testName, ChangeItem &expected, ChangeItem &actual);
 
 //*******************************************************//
 
-// Name of test: Testing createChangeItem
+// Name of test: Testing writing and reading binary records of ChangeItem class
 // Type: Functional Test
-// Preconditions: change item file is empty
-// Steps: run the program
-// Expected results: Program says "Creating change item passed."
-void testCreatingChangeItem()
-{
-  ChangeItemFile file;
-
-  // Create new Change Item (saves to disk)
-  ChangeItem item("Test Product", "V1", "Not working", "none", 5);
-  file.createChangeItem(item);
-
-  // Get Change Item from disk
-  ChangeItem createdChangeItem = file.findChangeItem(1);
-
-  // Test the Change Item
-  ChangeItem expectedChangeItem(1, "Test Product", "V1", "Not working", "none", 5);
-  assertChangeItem("Creating change item", expectedChangeItem, createdChangeItem);
-}
-
-//*******************************************************//
-
-// Name of test: Testing updateChangeItem
-// Type: Functional Test
-// Preconditions: change item file has one record already, that record having change ID of 1
+// Preconditions: No other ChangeItem record exists, must be from clean start
 // Steps: run the program
 // Expected results: Program says "Updating change item passed."
-void testUpdatingChangeItem()
-{
-  ChangeItemFile file;
 
-  // Create new Change Item (saves to disk)
-  ChangeItem item("Test Product", "V2", "Crashes", "none", 1);
+void testBinaryFileIO()
+{
+  //// Step 1. Write class to file ////
+  // start ChangeItemFile
+  ChangeItemFile file = strtItem();
+
+  // Create ChangeItem object
+  ChangeItem item("Excel", "V1", "Issue with Spreadsheets", "Assessed", 1);
+
+  // Write to disk
   file.createChangeItem(item);
 
-  // Update new Change Item (reads, then saves to disk)
-  ChangeItem item2 = file.findChangeItem(1);
-  item2.setStatus("Assessed");
-  file.updateChangeItem(item, item2);
+  // Close file
+  file.closeChangeItemFile();
+  // file.close();
 
-  // Get updated Change Item from disk
-  ChangeItem createdChangeItem = file.findChangeItem(2);
+  /// Step 2. Read class to memory and compare ///
+  //  Open ChangeItems.data file
+  ChangeItemFile file2 = strtItem();
+  //  Go to top of file
+  file2.seekToBeginningOfFile();
 
-  // Test the updated Change Item
-  ChangeItem testChangeItem(2, "Test Product", "V2", "Crashes", "Assessed", 1);
-  assertChangeItem("Updating change item", createdChangeItem, testChangeItem);
+  // Read created record into object
+  ChangeItem item2;
+  file2.findChangeItem(item.getChangeID(), item2);
+
+  //  Compare results
+  assertChangeItem("Testing writing and reading of ChangeItem class", item, item2);
+
+  //  Close file
+  file2.closeChangeItemFile();
 }
 
 //*******************************************************//
 
 int main()
 {
-  // testCreatingChangeItem();
-  // testUpdatingChangeItem();
+  testBinaryFileIO();
 }
 
 //*******************************************************//
