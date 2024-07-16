@@ -1,5 +1,5 @@
 // ChangeItem.h
-// Rev. 1 - 03/07/24 Original by D.O.J.J Software Development
+// Rev. 2 - 15/07/24 Original by D.O.J.J Software Development
 
 //*******************************************************//
 // This module is designed to manage everything to do with Change Items within a system while
@@ -12,6 +12,7 @@
 
 #include <cstring>
 #include <fstream>
+#include "BinaryFileIOHelper.h"
 using namespace std;
 
 //*******************************************************//
@@ -60,24 +61,23 @@ private:
 
 //*******************************************************//
 
-class ChangeItemFile
+class ChangeItemFile : public BinaryFileIOHelper<ChangeItem>
 {
 public:
     // Constructor
-    ChangeItemFile() {}
+    ChangeItemFile();
 
-    ChangeItem findChangeItem(int id);
+    bool findChangeItem(int id, ChangeItem &item);
     bool seekToBeginningOfFile();
     bool getNextChangeItem(ChangeItem &changeItemObj);
-    void createChangeItem(ChangeItem &aChangeItem);
-    void updateChangeItem(ChangeItem &aChangeItem);
+    bool createChangeItem(ChangeItem &aChangeItem);
+    bool updateChangeItem(ChangeItem &oldChangeItem, ChangeItem &newChangeItem);
     void searchChangeItem(int changeId);
 
     bool openChangeItemFile();
     bool closeChangeItemFile();
 
 private:
-    fstream fileStream;
     bool writeChangeItem(ChangeItem changeItemObj);
 };
 
