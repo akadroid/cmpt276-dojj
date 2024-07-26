@@ -297,7 +297,7 @@ bool ChangeItemFile::closeChangeItemFile()
 
 bool ChangeItemFile::writeChangeItem(ChangeItem changeItemObj)
 {
-  Write(changeItemObj);
+  return Write(changeItemObj);
 }
 
 //*******************************************************//

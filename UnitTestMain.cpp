@@ -78,8 +78,8 @@ void testUpdatingChangeItem()
 
 int main()
 {
-  // testCreatingChangeItem();
-  // testUpdatingChangeItem();
+  testCreatingChangeItem();
+  testUpdatingChangeItem();
 }
 
 //*******************************************************//
