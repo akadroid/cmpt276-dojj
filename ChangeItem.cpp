@@ -1,5 +1,5 @@
 // ChangeItem.cpp
-// Rev. 2 - 15/07/24 Original by D.O.J.J Software Development
+// Rev. 1 - 15/07/24 Original by D.O.J.J Software Development
 
 //*******************************************************//
 // This module implements the ChangeItem class and the ChangeItemFile class,
@@ -291,20 +291,18 @@ bool ChangeItemFile::closeChangeItemFile()
   }
 
   file.close();
-  // changeIdFile.close();
   return true;
 }
 
 bool ChangeItemFile::writeChangeItem(ChangeItem changeItemObj)
 {
-  Write(changeItemObj);
+  return Write(changeItemObj);
 }
 
 //*******************************************************//
 
 ChangeItemFile strtItem()
 {
-  // changeIdFile.open("changeId.txt", fstream::in | fstream::out | std::ios::app);
   return ChangeItemFile();
 }
 
