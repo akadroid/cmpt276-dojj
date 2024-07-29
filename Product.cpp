@@ -104,11 +104,13 @@ Product ProductFile::findProduct(char *searchName)
         buf.getName(compareString);
         if (strcmp(compareString,searchName) == 0)
         {
+            seekToBeginningOfFile();
             return buf;
         }
     }
 
     // If no match is found return an empty Product
+    seekToBeginningOfFile();
     return emptyProduct;
 }
 
@@ -126,7 +128,9 @@ bool ProductFile::seekToBeginningOfFile()
     }
 
     // Otherwise seek back to the start of the file and return
+    file.clear();
     file.seekg(0);
+    
     return file.good(); // Returns true if the seek was successful
 }
 
@@ -202,7 +206,7 @@ ProductFile strtProduct()
 // Function which inserts a product into the fixed-length binary file record
 // Uses both Product and ProductFile class operations, and checks for exceptions
 // about duplicates or a failed insertion
-int createProduct(Product productToAdd) {
+int createProduct(Product productToAdd, ProductFile &theFile) {
     // Adds the Product to the end of the fixed-length binary record file
 
     // Initalize local char arrays to check exceptions, and initalize return variable
@@ -215,7 +219,6 @@ int createProduct(Product productToAdd) {
     // Using local variables to perform this search
     productToAdd.getName(searchkey);
     Product searchProduct = Product();
-    ProductFile theFile = ProductFile();
     searchProduct = theFile.findProduct(searchkey);
     searchProduct.getName(searchresult);
 
@@ -225,7 +228,8 @@ int createProduct(Product productToAdd) {
     }
 
     // Insert the product and return wether the insertion was successful or not
-    insertionresult = createProduct(productToAdd);
+
+    insertionresult = theFile.createProduct(productToAdd);
     return insertionresult;
 }
 

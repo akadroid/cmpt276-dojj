@@ -161,7 +161,10 @@ bool ChangeRequestFile::seekToBeginningOfFile()
     cerr << "File is not open" << endl;
     return false;
   }
+
+  file.clear();
   file.seekg(0);
+  
   return file.good(); // Returns true if the seek was successful
 }
 

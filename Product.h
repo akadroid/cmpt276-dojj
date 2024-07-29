@@ -78,7 +78,7 @@ ProductFile strtProduct();
 
 //*******************************************************//
 
-int createProduct(Product productToAdd);
+int createProduct(Product productToAdd, ProductFile &theFile);
 // createProduct is a function which takes a product object that is passed to it as a function argument
 // The function returns 0 for a successful operation, and -1 if there is an error
 // It is expected to have all attributes of a product filled which is the name
