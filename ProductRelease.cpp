@@ -132,8 +132,8 @@ ProductRelease ProductReleaseFile::findProductRelease(char *releaseIDKey)
     // If we cannot find the start of the file throw an error
     if (!seekToBeginningOfFile())
     {
-    cerr << "Unable to find product release (cant seek to beginning)" << endl;
-    return emptyRelease;
+        cerr << "Unable to find product release (cant seek to beginning)" << endl;
+        return emptyRelease;
     }
 
     // Initalize local variables for the search
@@ -152,11 +152,13 @@ ProductRelease ProductReleaseFile::findProductRelease(char *releaseIDKey)
         buf.getProductID(compareString);
         if (strcmp(compareString,releaseIDKey) == 0)
         {
+            seekToBeginningOfFile();
             return buf;
         }
     }
 
     // If no match is found return an empty Product Release
+    seekToBeginningOfFile();
     return emptyRelease;
 }
 
@@ -169,12 +171,14 @@ bool ProductReleaseFile::seekToBeginningOfFile()
     // If there is no file open throw an error
     if (!file.is_open())
     {
-    cerr << "File is not open" << endl;
-    return false;
+        cerr << "File is not open" << endl;
+        return false;
     }
 
     // Otherwise seek back to the start of the file and return
+    file.clear();
     file.seekg(0);
+    
     return file.good(); // Returns true if the seek was successful
 }
 
@@ -252,23 +256,22 @@ ProductReleaseFile strtRelease()
 // Function which inserts a product release into the fixed-length binary file record
 // Uses both ProductRelease and ProductFile class operations, and checks for exceptions
 // about duplicates or a failed insertion
-int createProductRelease(ProductRelease productReleaseToAdd)
+int createProductRelease(ProductRelease productReleaseToAdd, ProductReleaseFile &theFile)
 {
     // Adds the Product to the end of the fixed-length binary record file
 
     // Initalize local char arrays to check exceptions, and initalize return variable
-    char searchkey[9] = "";
-    char searchresult[9] = "";
+    char searchkey[20] = "";
+    char searchresult[20] = "";
     bool insertionresult = 1;
 
     // Check to see if the product we are adding already exists
     // by searching for it with a ProductRelease object
     // Initalize some local variables to assist with this search
-    productReleaseToAdd.getProductName(searchkey);
+    productReleaseToAdd.getProductID(searchkey);
     ProductRelease searchProduct = ProductRelease();
-    ProductReleaseFile theFile = ProductReleaseFile();
     searchProduct = theFile.findProductRelease(searchkey);
-    searchProduct.getProductName(searchresult);
+    searchProduct.getProductID(searchresult);
 
     // If the product is a duplicate return a failed insertion
     if (strcmp(searchresult, searchkey) == 0) {
@@ -276,7 +279,7 @@ int createProductRelease(ProductRelease productReleaseToAdd)
     }
 
     // Insert the product and return wether the insertion was successful or not
-    insertionresult = createProductRelease(productReleaseToAdd);
+    insertionresult = theFile.createProductRelease(productReleaseToAdd);
     return insertionresult;
 }
 

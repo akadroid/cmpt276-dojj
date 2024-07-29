@@ -87,7 +87,7 @@ ProductReleaseFile strtRelease();
 
 //*******************************************************//
 
-int createProductRelease(ProductRelease productReleaseToAdd);
+int createProductRelease(ProductRelease productReleaseToAdd, ProductReleaseFile &theFile);
 // createProductRelease is a function which takes a ProductRelease object that is passed to it
 // as a function argument which is the specific ProductRelease to add to the file
 // it returns 0 if successful and -1 if there is an error
