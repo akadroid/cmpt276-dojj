@@ -208,9 +208,10 @@ void addProduct()
 {
     cout << "What is the name of the Product? (Max 10 Char.)" << endl;
     char productName[MAX_PRODUCT_NAME_SIZE];
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     cin.getline(productName, MAX_PRODUCT_NAME_SIZE);
 
-    cout << "Would you like to confirm adding WordEdit as a product? (Y/N)" << endl;
+    cout << "Would you like to confirm adding " << productName << " as a product? (Y/N)" << endl;
     char choice;
     cin >> choice;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');

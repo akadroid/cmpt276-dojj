@@ -71,7 +71,7 @@ void productSubMenu()
 {
     cout << "+++++++ Products +++++++" << endl;
     cout << "1) Add a Product" << endl;
-    cout << "2) Add a Prodcut Release" << endl;
+    cout << "2) Add a Product Release" << endl;
     cout << "0) Return to the Main Menu" << endl;
 
     int selection;

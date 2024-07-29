@@ -225,7 +225,7 @@ int createProduct(Product productToAdd) {
     }
 
     // Insert the product and return wether the insertion was successful or not
-    insertionresult = createProduct(productToAdd);
+    insertionresult = theFile.createProduct(productToAdd);
     return insertionresult;
 }
 
