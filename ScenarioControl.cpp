@@ -303,10 +303,13 @@ void addChangeReq()
 
 //*******************************************************//
 
+// Scenario when user wants to add a Product, get required data
+// and perform required operation to add a product
 void addProduct()
 {
     cout << "What is the name of the Product? (Max 10 Char.)" << endl;
     char productName[MAX_PRODUCT_NAME_SIZE];
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     cin.getline(productName, MAX_PRODUCT_NAME_SIZE);
 
     cout << "Would you like to confirm adding " << productName << " as a product? (Y/N)" << endl;
@@ -319,8 +322,11 @@ void addProduct()
     switch (choice)
     {
     case 'Y':
-        createProduct(toAdd);
-        cout << "The product has been added successfully." << endl;
+        if(createProduct(toAdd, productFile) != 0) {
+            cout << "The product has been added successfully." << endl;
+        } else {
+            cout << "Duplicate product detected. The product was not added." << endl;
+        }
         break;
     case 'N':
         cout << "The product was not added" << endl;
@@ -332,12 +338,15 @@ void addProduct()
 
 //*******************************************************//
 
+// Scenario when user wants to add a Product Release, get required data
+// and perform required operation to add a product release
 void addProductRelease()
 {
     char productName[MAX_PRODUCT_NAME_SIZE];
     char releaseID[MAX_RELEASEID_SIZE];
     char releaseDate[MAX_DATE_SIZE];
 
+    productFile.seekToBeginningOfFile();
     selectProduct(productName);
     if (productName[0] == '\0') return; // no product was selected therefore exit function
 
@@ -347,8 +356,8 @@ void addProductRelease()
     cout << "What is the Release Date? (In form: YYYY-MM-DD)" << endl;
     cin.getline(releaseDate, MAX_DATE_SIZE);
 
-    cout << "Would you like to confirm adding a Product Release with ID" << releaseID << "with Release Date"
-        << releaseDate << "for " << productName << "? (Y/N)" << endl;
+    cout << "Would you like to confirm adding a Product Release with ID " << releaseID << " with Release Date "
+        << releaseDate << " for " << productName << "? (Y/N)" << endl;
     char choice;
     cin >> choice;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -358,8 +367,11 @@ void addProductRelease()
     switch (choice)
     {
         case 'Y':
-            createProductRelease(productRelease);
-            cout << "The product has been added successfully." << endl;
+            if(createProductRelease(productRelease, productReleaseFile) != 0) {
+                cout << "The product has been added successfully." << endl;
+            } else {
+                cout << "Duplicate product release detected. The product release was not added." << endl;
+            }
             break;
         case 'N':
             cout << "The product release was not added." << endl;
