@@ -1,10 +1,11 @@
 // main.cpp
+// Rev. 2 - 17/07/24 Renamed main menu loop to activateUI
 // Rev. 1 - 03/07/24 Original by D.O.J.J Software Development
 
 //*******************************************************//
 
 #include <iostream>
-#include "ScenarioContorl.h"
+#include "ScenarioControl.h"
 #include "UI.h"
 using namespace std;
 
@@ -13,7 +14,7 @@ using namespace std;
 int main()
 {
     strtControl();
-    mainMenuLoop();
+    activateUI();
     closeControl();
     return 0;
 }

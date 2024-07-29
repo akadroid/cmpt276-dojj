@@ -1,4 +1,5 @@
 // UI.cpp
+// Rev. 2 - 16/07/24 Filled in function calls for each submenu
 // Rev. 1 - 03/07/24 Original by D.O.J.J Software Development
 
 //*******************************************************//
@@ -9,7 +10,7 @@ using namespace std;
 
 //*******************************************************//
 
-//function headers (so that u mainMenuLoop can actualy run the functions)
+// function headers (so that mainMenuLoop can actualy run the functions)
 int displayMainMenu();
 void productSubMenu();
 void changeItemSubMenu();
@@ -38,7 +39,7 @@ void activateUI()
             case 0:
                 break;
             default:
-                //insert message about bad input
+                cout << "Bad input detected, please try again" << endl;
                 break;
         }
     } while (selection != 0);
@@ -77,16 +78,16 @@ void productSubMenu()
     cin >> selection;
     switch (selection){
         case 1:
-            //add product function from scenario control (nothing for now as the function is not actaully made yet)
+            addProduct();
             break;
         case 2:
-            //add product release function
+            addProductRelease();
             break;
         case 0:
-            //back to main menu
+            //back to main menu as chosen
             break;
         default:
-            //have message informing them of bad input
+            cout << "Bad input detected, returning to main menu" << endl;
             break;
     }
 }
@@ -107,19 +108,19 @@ void changeItemSubMenu()
     cin >> selection;
     switch (selection){
         case 1:
-            //add change item function
+            addChangeItem();
             break;
         case 2: 
-            //query a change item function
+            queryChangeItems();
             break;
         case 3:
-            //update a change item function
+            modifyChangeItem();
             break;
         case 0:
             //return to main menu
             break;
         default:
-            //inform user of bad input
+            cout << "Bad input detected, returning to main menu" << endl;
             break;
     }
 }
@@ -138,13 +139,13 @@ void changeReqSubMenu()
     cin >> selection;
     switch (selection){
         case 1:
-            //add a request function
+            addChangeReq();
             break;
         case 0:
             //back to main menu
             break;
         default:
-            //inform user of bad input
+            cout << "Bad input detected, returning to main menu" << endl;
             break;
     }
 }
@@ -165,16 +166,16 @@ void reportSubMenu()
     switch (selection)
     {
         case 1:
-            // unimplemented change items func
+            listChangeItemsReport();
             break;
         case 2:
-            // customer/staff notified function
+            listCustomersStaffReport();
             break;
         case 0:
             //back to main menu
             break;
         default:
-            //inform user of bad input
+            cout << "Bad input detected, returning to main menu" << endl;
             break;
     }
 }

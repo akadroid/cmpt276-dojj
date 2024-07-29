@@ -1,5 +1,5 @@
 // BinaryFileIOHelper.h
-// Rev. 2 - 15/07/24 Original by D.O.J.J Software Development
+// Rev. 1 - 15/07/24 Original by D.O.J.J Software Development
 
 //*******************************************************//
 // This module defines the BinaryFileIOHelper template class,

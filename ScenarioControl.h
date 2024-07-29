@@ -1,4 +1,5 @@
 // ScenarioControl.h
+// Rev. 2 - 16/07/24 Added implementation of the functions to ScenarioControl.cpp
 // Rev. 1 - 03/07/24 Original by D.O.J.J Software Development
 
 //*******************************************************//

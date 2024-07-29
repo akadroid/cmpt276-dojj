@@ -1,5 +1,6 @@
 // ChangeItem.h
-// Rev. 2 - 15/07/24 Original by D.O.J.J Software Development
+// Rev. 2 - 17/07/24 Updated strings to char arrays, other general improvements
+// Rev. 1 - 03/07/24 Original by D.O.J.J Software Development
 
 //*******************************************************//
 // This module is designed to manage everything to do with Change Items within a system while
