@@ -44,6 +44,7 @@ bool BinaryFileIOHelper<T>::Write(T &item)
     return false;
   }
   file.write(reinterpret_cast<char *>(&item), sizeof(T));
+  file.flush();
   return file.good();
 }
 // Implementation of the Write function for handling writes to a binary file
