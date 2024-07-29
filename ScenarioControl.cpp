@@ -22,7 +22,7 @@ using namespace std;
 #define WIDTH 30
 
 // global variables 
-ProductFile productFile;
+ProductFile productFile = strtProduct();
 CustomerFile customerFile;
 ChangeItemFile changeItemFile;
 ChangeRequestFile changeRequestFile;
@@ -221,8 +221,11 @@ void addProduct()
     switch (choice)
     {
     case 'Y':
-        createProduct(toAdd);
-        cout << "The product has been added successfully." << endl;
+        if(createProduct(toAdd, productFile) != 0) {
+            cout << "The product has been added successfully." << endl;
+        } else {
+            cout << "Duplicate product detected. The product was not added." << endl;
+        }
         break;
     case 'N':
         cout << "The product was not added" << endl;
@@ -242,6 +245,7 @@ void addProductRelease()
     char releaseID[MAX_RELEASEID_SIZE];
     char releaseDate[MAX_DATE_SIZE];
 
+    productFile.seekToBeginningOfFile();
     selectProduct(productName);
     if (productName[0] == '\0') return; // no product was selected therefore exit function
 
@@ -251,8 +255,8 @@ void addProductRelease()
     cout << "What is the Release Date? (In form: YYYY-MM-DD)" << endl;
     cin.getline(releaseDate, MAX_DATE_SIZE);
 
-    cout << "Would you like to confirm adding a Product Release with ID" << releaseID << "with Release Date"
-        << releaseDate << "for WordEdit? (Y/N)" << endl;
+    cout << "Would you like to confirm adding a Product Release with ID " << releaseID << " with Release Date "
+        << releaseDate << " for " << productName << "? (Y/N)" << endl;
     char choice;
     cin >> choice;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -262,8 +266,11 @@ void addProductRelease()
     switch (choice)
     {
         case 'Y':
-            createProductRelease(productRelease);
-            cout << "The product has been added successfully." << endl;
+            if(createProductRelease(productRelease, productReleaseFile) != 0) {
+                cout << "The product has been added successfully." << endl;
+            } else {
+                cout << "Duplicate product release detected. The product release was not added." << endl;
+            }
             break;
         case 'N':
             cout << "The product release was not added." << endl;
@@ -697,6 +704,7 @@ void selectProduct(char* productName)
     string choice;
     char prodName[MAX_PRODUCT_NAME_SIZE];
     Product product;
+    Product tmp;
 
     while (!exit)
     {
@@ -707,7 +715,7 @@ void selectProduct(char* productName)
             if (!productFile.getNextProduct(product)) break;
             counter++;
             product.getName(prodName);
-            cout << i++ << ") " << prodName << endl;
+            cout << counter << ") " << prodName << endl;
         }
         cout << "+++++" << endl;
         cout << "+++++" << endl;
@@ -721,28 +729,30 @@ void selectProduct(char* productName)
         if (is_number(choice))
         {
             int number = stoi(choice);
-            if (1 <= number  && number <= 20)
+            if (1 <= number && number <= counter)
             {
-                counter -= number;
+                // counter -= number;
                 productFile.seekToBeginningOfFile();
-                for (int i=0; i<counter; i++)
+                for (int i=0; i < number; i++)
                 {
-                    productFile.getNextProduct(product);
+                    productFile.getNextProduct(tmp);
                 }
-                product.getName(productName);
+                tmp.getName(productName);
                 exit = true;
             }
             else if (number == 0){
                 productName[0] = '\0'; //set as basically blank c string
                 exit = true;
+            } else {
+                cout << "Number input goes beyond the range, try again" << endl;
+                productFile.seekToBeginningOfFile();
+                counter = 0;
             }
-
-            cout << "Number input goes beyond the range, try again" << endl;
         }
         else if (choice == "P" || choice == "p")
         {
             productFile.seekToBeginningOfFile();
-            counter -= 20;
+            counter -= counter;
             for(int i=0; i < counter ; i++) { productFile.getNextProduct(product); }
         }
         else if (choice == "N" || choice == "n")

@@ -59,6 +59,7 @@ int displayMainMenu()
 
     int selection;
     cin >> selection;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     cout << endl;
     return selection;
 }
@@ -76,6 +77,7 @@ void productSubMenu()
 
     int selection;
     cin >> selection;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     switch (selection){
         case 1:
             addProduct();
@@ -106,6 +108,7 @@ void changeItemSubMenu()
 
     int selection;
     cin >> selection;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     switch (selection){
         case 1:
             addChangeItem();
@@ -137,6 +140,7 @@ void changeReqSubMenu()
 
     int selection;
     cin >> selection;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     switch (selection){
         case 1:
             addChangeReq();
@@ -163,6 +167,7 @@ void reportSubMenu()
 
     int selection;
     cin >> selection;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     switch (selection)
     {
         case 1:
