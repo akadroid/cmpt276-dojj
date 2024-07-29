@@ -783,23 +783,23 @@ void selectProduct(char* productName)
         cerr << "Unable to find product (cant seek to beginning)" << endl;
     }
     
-    unsigned int counter = 0; //file line position
+    int counter = 0; //file line position
     bool exit = false;
+    string choice;
     char prodName[MAX_PRODUCT_NAME_SIZE];
     Product product;
-
-    string choice; // for inputs
+    Product tmp;
 
     while (!exit)
     {
         cout << "Select the Product you want to look at" << endl;
         cout << "+++++" << endl;
         cout << "Product:" << endl;
-        for (unsigned int i=0; i < 20; i++){
-            if (!productFile.getNextProduct(product)) break; // no more products to print out
+        for (int i=0; i < 20; i++){
+            if (!productFile.getNextProduct(product)) break;
             counter++;
             product.getName(prodName);
-            cout << i++ << ") " << prodName << endl;
+            cout << counter << ") " << prodName << endl;
         }
         cout << "+++++" << endl;
         cout << "+++++" << endl;
@@ -813,34 +813,31 @@ void selectProduct(char* productName)
         if (is_number(choice))
         {
             int number = stoi(choice);
-            if (1 <= number && number <= 20)
+            if (1 <= number && number <= counter)
             {
-                counter = (counter/20) * 20 + number; //basically do integer division to see how many chunks of 20 have gone by, then multiply back 20 add the number to it to get position
+                // counter -= number;
                 productFile.seekToBeginningOfFile();
-                for (unsigned int i=0; i<counter; i++)
+                for (int i=0; i < number; i++)
                 {
-                    productFile.getNextProduct(product);
+                    productFile.getNextProduct(tmp);
                 }
-                product.getName(productName);
+                tmp.getName(productName);
                 exit = true;
             }
             else if (number == 0){
                 productName[0] = '\0'; //set as basically blank c string
                 exit = true;
+            } else {
+                cout << "Number input goes beyond the range, try again" << endl;
+                productFile.seekToBeginningOfFile();
+                counter = 0;
             }
-
-            cout << "Number input goes beyond the range, try again" << endl;
         }
         else if (choice == "P" || choice == "p")
         {
-            productFile.seekToBeginningOfFile(); //set pointer to beginning first
-
-            if (counter <= 20) { counter = 0; } // if counter is 
-            else
-            {
-                counter -= 20;
-                for(unsigned int i=0; i < counter ; i++) { productFile.getNextProduct(product); }
-            }
+            productFile.seekToBeginningOfFile();
+            counter -= counter;
+            for(int i=0; i < counter ; i++) { productFile.getNextProduct(product); }
         }
         else if (choice == "N" || choice == "n")
         {
@@ -848,14 +845,15 @@ void selectProduct(char* productName)
         }
         else
         {
-            if (!formatMismatchError())
-            {
-                productName[0] = '\0'; // same as choosing to exit, set first element to null
-                exit = true; //leave the function
-            }
+            cout << "Bad input detected, no product selected" << endl;
+            productName[0] = '\0';
+            break;
         }
     }
 }
+
+//This function looks to provide the user interface options when selecting we have to select a product
+
 
 //This function looks to provide the user interface options when selecting we have to select a product
 
