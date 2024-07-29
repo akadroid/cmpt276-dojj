@@ -1,9 +1,13 @@
 // ScenarioControl.cpp
-// Rev. 1 - 17/07/2024 Original by D.O.J.J Software Development
+// Rev. 3 - (Add date) Fixed many glaring issues within the code such as error handling and general incorrect algorithms
+// Rev. 2 - 16/07/24 Added implementation of the functions to ScenarioControl.cpp
 
+
+//editing notes: addchangeitem is almost finished, just work on the end part, fix select product and we should be good for the most part
 //*******************************************************//
 
 #include <iostream>
+#include <cstring>
 #include <string>
 #include <limits>
 #include <algorithm>
@@ -11,7 +15,8 @@
 #include "ScenarioControl.h"
 using namespace std;
 
-#define MAX_NAME_SIZE 31 // accounts for the null character
+// Each macro also accounts for the new-line character
+#define MAX_NAME_SIZE 31
 #define MAX_PHONE_NUM_SIZE 11
 #define MAX_EMAIL_SIZE 24
 #define MAX_PRODUCT_NAME_SIZE 11
@@ -21,8 +26,10 @@ using namespace std;
 #define MAX_STATUS_SIZE 11
 #define WIDTH 30
 
+//*******************************************************//
+
 // global variables 
-ProductFile productFile = strtProduct();
+ProductFile productFile;
 CustomerFile customerFile;
 ChangeItemFile changeItemFile;
 ChangeRequestFile changeRequestFile;
@@ -53,17 +60,15 @@ bool formatMismatchError()
 
 //*******************************************************//
 
-bool is_number(const std::string& s) 
+bool is_number(const string& s) 
 {
-    return !s.empty() && std::find_if(s.begin(), 
-        s.end(), [](unsigned char c) { return !std::isdigit(c); }) == s.end();
+    return !s.empty() && find_if(s.begin(), s.end(), [](unsigned char c){ return !isdigit(c); }) == s.end();
 }
 // https://stackoverflow.com/questions/4654636/how-to-determine-if-a-string-is-a-number-with-c
 // Helper function to find if the string is a number or not
 
 //*******************************************************//
 
-// Startup functions that need to be called
 void strtControl()
 {
     productFile = strtProduct();
@@ -75,7 +80,6 @@ void strtControl()
 
 //*******************************************************//
 
-// Shutdown functions that need to be called
 void closeControl()
 {
     closeProduct(productFile);
@@ -87,8 +91,6 @@ void closeControl()
 
 //*******************************************************//
 
-// Scenario when user wants to add a Change Request, get required data
-// and perform required operations to add a change request
 void addChangeReq()
 {
     string temp; //put things into string before the char array to ensure proper lenght
@@ -123,25 +125,18 @@ void addChangeReq()
         cout << "Enter the phone number:" << endl;
         getline(cin, temp);
 
-        if (temp.size() != MAX_PHONE_NUM_SIZE - 1) // must be 10 characters
+        if (temp.size() != MAX_PHONE_NUM_SIZE - 1) // check that it must be 10 characters
         { 
             if (formatMismatchError() == false) return;
         }
-        else
+        else // now check if the 10 digit string a number
         {
-            bool validDigits = true;
-            for (char c : temp) //check if its 10 valid characters
-            {
-                if (!isdigit(c))
-                {   
-                    validDigits = false; // change for if we break out of the for loop
-                    if(formatMismatchError() == false) return;
-                    break; // if they want to retry, break out 
-                }
-            }
-            if (validDigits) validNum = true; //
+            if(is_number(temp)) { validNum = true; }
+            else { if(!formatMismatchError()) return; }
         }
     } while (!validNum);
+
+    strcpy(phoneNum, temp.c_str()); // move phone number over
 
 
     // get email
@@ -152,31 +147,53 @@ void addChangeReq()
 
         if (temp.size() > MAX_EMAIL_SIZE)
         {
-            if (formatMismatchError() == false) return;
+            if (!formatMismatchError()) return;
         }
     } while (temp.size() > MAX_EMAIL_SIZE);
 
     strcpy(email, temp.c_str());
 
+
     // add or dont add customer. 
     char choice;
-    cout << "Do you want to add the customer to the system (Y/N)" << endl;
-    cin >> choice;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    Customer customer(name, email, phoneNum);
-
-    switch (choice)
+    bool exitCustomer = false;
+    do
     {
-        case 'Y':
-            customerFile.createCustomer(customer);
-            cout << "The customer is successfully added to the system!" << endl;
-            break;
-        case 'N':
-            cout << "The customer is not added to the system" << endl;
-            break;
-        default:
-            cout << "Bad input detected, the customer is not added." << endl;
-    }
+        cout << "Do you want to add the customer to the system (Y/N)" << endl;
+        cin >> choice;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        switch (choice)
+        {
+            case 'Y':
+                Customer customer(name, email, phoneNum);
+                if (!customerFile.findCustomer(name, customer))
+                {
+                    if(customerFile.createCustomer(customer))
+                    {
+                        cout << "The customer is successfully added to the system!" << endl;
+                        exitCustomer = true;
+                    }
+                    else
+                    {
+                        cout << "Failed to add customer to the system." << endl;
+                        return;
+                    }
+                }
+                else
+                {
+                    cout << "The user already exists. Continuing.." << endl;
+                    exitCustomer = true;
+                }
+                break;
+            case 'N':
+                cout << "The customer is not added to the system" << endl;
+                return; // just exit the option at this point
+            default:
+                if (!formatMismatchError()) return;
+                break;
+        }
+    } while(exitCustomer);
 
     // select the product
     selectProduct(productName);
@@ -184,31 +201,112 @@ void addChangeReq()
 
     // select the change item for the product
     selectChangeItem(productName, changeID);
-    if(changeID == -1)
+
+    if(changeID == -1) //if the user does not select a change item, attempt to create one
     {   
-        cout << "Enter the description of the request" << endl;
-        cin.getline(description, MAX_DESCRIPTION_SIZE);
-        cout << "Enter the Priority of the request" << endl;
-        cin >> priority;
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        // enter description
+        do
+        {
+            cout << "Enter the description of the request:" << endl;
+            getline(cin, temp);
+            if (temp.size() > MAX_DESCRIPTION_SIZE)
+            {
+                if (!formatMismatchError()) return;
+            }
+        } while(temp.size() > MAX_DESCRIPTION_SIZE);
+
+        strcpy(description, temp.c_str());
+        
+        // enter priority
+        bool exitPrio = false;
+        do
+        {
+            cout << "Enter the Priority of the request:" << endl;
+            cin >> priority;
+
+            if(cin.fail() || priority < 1 || priority > 5)
+            {
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                if (!formatMismatchError()) return;
+            }
+            else
+            {
+                cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
+                exitPrio = true;
+            }   
+        } while(exitPrio);
+
+        // Confirmation and Printing
+        bool exitConf = false;
+        do
+        {
+            cout << "Confirm the above change request (Y/N)" << endl;
+            char choice2;
+            cin >> choice2;
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+            switch (choice)
+            {
+                case 'Y':
+                    ChangeItem toAddChItem(productName, releaseID, description, "Reported", priority);
+                    changeID = toAddChItem.getChangeID();
+                    if (changeItemFile.createChangeItem(toAddChItem))
+                    {
+                        cout << "The change ID for the change item is assigned as" 
+                            << changeID << "and the status is reported" << endl; //hard code because its default
+
+                        ChangeRequest toAddChReq(changeID, releaseID, name, date);
+                        if (changeRequestFile.createChangeRequest(toAddChReq))
+                        {
+                            cout << "The request that is assigned to " << changeID
+                                << " has been sent out to the system." << endl;
+                            exitConf = true;
+                        }
+                        else
+                        {
+                            cout << "Failed to add change request to file, aborting operation.." << endl;
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        cout << "Failed to add change item to file, aborting operation.." << endl;
+                        return;
+                    }  
+                    break;
+                case 'N':
+                    cout << "The change request was not added, returning to main menu.." << endl;
+                    return;
+                default:
+                    if (!formatMismatchError()) return;
+                    break;
+            }
+        } while (exitConf);
     }
-    else
+    else // in this case, a change item is selected and thus we can simply 
     {
-        ChangeRequest toAdd(changeID, releaseID, name, date);
-        //the method to write to file is private and therefore unaccessable, but we add file here
+        ChangeRequest toAddChReq(changeID, releaseID, name, date);
+        if(changeRequestFile.createChangeRequest(toAddChReq))
+        {
+            cout << "The change ID for the request is " << changeID << "." << endl;
+            cout << "The request that is assigned to " << changeID 
+                << " has been sent to the system." << endl;
+        }
+        else
+        {
+            cout << "Failed to add change request to the system, aborting operation.." << endl;
+        }
     }
 
 }
 
 //*******************************************************//
 
-// Scenario when user wants to add a Product, get required data
-// and perform required operation to add a product
 void addProduct()
 {
     cout << "What is the name of the Product? (Max 10 Char.)" << endl;
     char productName[MAX_PRODUCT_NAME_SIZE];
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     cin.getline(productName, MAX_PRODUCT_NAME_SIZE);
 
     cout << "Would you like to confirm adding " << productName << " as a product? (Y/N)" << endl;
@@ -221,11 +319,8 @@ void addProduct()
     switch (choice)
     {
     case 'Y':
-        if(createProduct(toAdd, productFile) != 0) {
-            cout << "The product has been added successfully." << endl;
-        } else {
-            cout << "Duplicate product detected. The product was not added." << endl;
-        }
+        createProduct(toAdd);
+        cout << "The product has been added successfully." << endl;
         break;
     case 'N':
         cout << "The product was not added" << endl;
@@ -237,15 +332,12 @@ void addProduct()
 
 //*******************************************************//
 
-// Scenario when user wants to add a Product Release, get required data
-// and perform required operation to add a product release
 void addProductRelease()
 {
     char productName[MAX_PRODUCT_NAME_SIZE];
     char releaseID[MAX_RELEASEID_SIZE];
     char releaseDate[MAX_DATE_SIZE];
 
-    productFile.seekToBeginningOfFile();
     selectProduct(productName);
     if (productName[0] == '\0') return; // no product was selected therefore exit function
 
@@ -255,8 +347,8 @@ void addProductRelease()
     cout << "What is the Release Date? (In form: YYYY-MM-DD)" << endl;
     cin.getline(releaseDate, MAX_DATE_SIZE);
 
-    cout << "Would you like to confirm adding a Product Release with ID " << releaseID << " with Release Date "
-        << releaseDate << " for " << productName << "? (Y/N)" << endl;
+    cout << "Would you like to confirm adding a Product Release with ID" << releaseID << "with Release Date"
+        << releaseDate << "for " << productName << "? (Y/N)" << endl;
     char choice;
     cin >> choice;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -266,11 +358,8 @@ void addProductRelease()
     switch (choice)
     {
         case 'Y':
-            if(createProductRelease(productRelease, productReleaseFile) != 0) {
-                cout << "The product has been added successfully." << endl;
-            } else {
-                cout << "Duplicate product release detected. The product release was not added." << endl;
-            }
+            createProductRelease(productRelease);
+            cout << "The product has been added successfully." << endl;
             break;
         case 'N':
             cout << "The product release was not added." << endl;
@@ -283,8 +372,6 @@ void addProductRelease()
 
 //*******************************************************//
 
-// Scenario when user wants to add a Change Item, get required data
-// and perform required operation to add a change item
 void addChangeItem()
 {
     char productName[MAX_PRODUCT_NAME_SIZE];
@@ -311,7 +398,7 @@ void addChangeItem()
 
     ChangeItem toAdd(productName, releaseID, description, status, priority);
 
-    cout << "Would you like to confirm adding this Change Item to the product WordEdit (Y/N):" << endl;
+    cout << "Would you like to confirm adding this Change Item to the product " << productName << " (Y/N):" << endl;
     cout << "Change ID" << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
             << setw(WIDTH) << "Priority" << setw(WIDTH) << "Release ID" << endl;
      cout << toAdd.getChangeID() << left << setw(WIDTH) << description << setw(WIDTH) << status
@@ -339,9 +426,6 @@ void addChangeItem()
 
 //*******************************************************//
 
-// Scenario when user chooses they want to modify a change item,
-// find the change item in the respective file and perform the changes
-// needed
 void modifyChangeItem()
 {
     char productName[MAX_PRODUCT_NAME_SIZE];
@@ -496,8 +580,7 @@ void modifyChangeItem()
 }
 
 //*******************************************************//
-// Scenario when user wants to search for a ChangeItem, get required information
-// and perform required operation with a linear search of the binary file
+
 void queryChangeItems()
 {
     char productName[MAX_PRODUCT_NAME_SIZE];
@@ -515,8 +598,6 @@ void queryChangeItems()
 
 //*******************************************************//
 
-// Scenario when user wants a report for a list of change items for a product release
-// Perform needed operations to obtain and print this report
 void listChangeItemsReport()
 {
     char productName[MAX_PRODUCT_NAME_SIZE];
@@ -525,8 +606,9 @@ void listChangeItemsReport()
     char status[MAX_STATUS_SIZE];
     int priority = 0;
     int changeID = 0;
-    int counter = 0;
+    unsigned int counter = 0;
     ChangeItem changeItem;
+    string choice;
     
 
     selectProduct(productName);
@@ -540,7 +622,7 @@ void listChangeItemsReport()
         cout << "+++++" << endl;
         cout << "   Change ID" << left << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
             << setw(WIDTH) << "Priority" << setw(WIDTH) << "Anticipated Release" << endl;
-        for (int i=0; i < 20;)
+        for (unsigned int i=0; i < 20;)
         {
             if (!changeItemFile.getNextChangeItem(changeItem)) break; // get next change item, but if read fails then break
             char currentProduct[MAX_PRODUCT_NAME_SIZE];
@@ -565,30 +647,28 @@ void listChangeItemsReport()
         cout << "Press 0 to Return" << endl;
         cout << "+++++" << endl;
 
-        string choice;
+        getline(cin, choice);
+
         if (is_number(choice))
         {
             int number = stoi(choice);
-            if (1 <= number  && number <= 20)
+            if (number == 0){ exit = true; }
+            else
             {
-                counter -= number;
-                changeItemFile.seekToBeginningOfFile();
-                for (int i=0; i<counter; i++)
-                {
-                    changeItemFile.getNextChangeItem(changeItem);
-                }
-                exit = true;
-            }
-            else if (number == 0){
-                exit = true;
-            }
-            cout << "Number input goes beyond the range, try again" << endl;
+                cout << "Number input goes beyond the range, try again" << endl;
+            }  
         }
         else if (choice == "P" || choice == "p")
         {
             changeItemFile.seekToBeginningOfFile();
-            counter -= 20;
-            for(int i=0; i < counter ; i++) { changeItemFile.getNextChangeItem(changeItem); }
+
+            if (counter <= 20) { counter = 0; }
+            else
+            {
+                counter -= 20;
+                for(unsigned int i=0; i < counter ; i++) { changeItemFile.getNextChangeItem(changeItem); }
+            }
+            
         }
         else if (choice == "N" || choice == "n")
         {
@@ -596,22 +676,19 @@ void listChangeItemsReport()
         }
         else
         {
-            cout << "Bad input detected, no Change Item will be selected" << endl;
-            break;
+            if (!formatMismatchError()) exit = true;
         }
     }
 }
 
 //*******************************************************//
 
-// Scenario when user wants a report for a list of customers associated with a change request
-// Perform needed operations to obtain and print this report
-void listCustomersStaffReport()
+void listCustomerStaffReport()
 {
     char productName[MAX_PRODUCT_NAME_SIZE];
     char customerName[MAX_NAME_SIZE];
     int changeID;
-    int counter;
+    unsigned int counter;
     ChangeRequest changeRequest;
     Customer toFind;
 
@@ -628,7 +705,7 @@ void listCustomersStaffReport()
         cout << "List of Customers/Staff to inform about implemented change:" << endl;
         cout << "+++++" << endl;
         cout << "Name" << setw(WIDTH) << "Email" << setw(WIDTH) << "Phone Number" << endl;
-        for (int i=0; i < 20;){
+        for (unsigned int i=0; i < 20;){
             if (!changeRequestFile.getNextChangeRequest(changeRequest)) break; //get the next item, if eof then stop and break out of the loop
             int currentChangeID = changeRequest.getRequestID(); //naming conflict but this is the change id
             if (changeID == currentChangeID)
@@ -640,7 +717,6 @@ void listCustomersStaffReport()
                 customerFile.findCustomer(customerName, toFind);
                 cout << customerName; 
             }
-            
         }
         cout << "+++++" << endl;
         cout << "+++++" << endl;
@@ -656,39 +732,35 @@ void listCustomersStaffReport()
         if (is_number(choice)) //decisions on what to do based on choice
         {
             int number = stoi(choice);
-            if (1 <= number  && number <= 20)
+            if (number == 0){ exit = true; }
+            else
             {
-                counter -= number;
-                changeRequestFile.seekToBeginningOfFile();
-                for (int i=0; i<counter; i++)
-                {
-                    changeRequestFile.getNextChangeRequest(changeRequest);
-                }
-                exit = true;
+                cout << "Number input goes beyond the range, try again" << endl;
             }
-            else if (number == 0){
-                exit = true;
-            }
-
-            cout << "Number input goes beyond the range, try again" << endl;
         }
         else if (choice == "P" || choice == "p")
         {
             changeRequestFile.seekToBeginningOfFile();
-            counter -= 20;
-            for(int i=0; i < counter ; i++) { changeRequestFile.getNextChangeRequest(changeRequest); }
+
+            if (counter <= 20) { counter = 0; }
+            else
+            {
+                counter -= 20;
+                for(int i=0; i < counter ; i++) { changeRequestFile.getNextChangeRequest(changeRequest); }
+            }
         }
+            
         else if (choice == "N" || choice == "n")
         {
             // dont do anything
         }
         else
         {
-            cout << "Bad input detected, no Change Item will be selected" << endl;
-            break;
+            if (!formatMismatchError()) exit = true;
         }
     }
 }
+
 
 //*******************************************************//
 
@@ -699,23 +771,23 @@ void selectProduct(char* productName)
         cerr << "Unable to find product (cant seek to beginning)" << endl;
     }
     
-    int counter = 0; //file line position
+    unsigned int counter = 0; //file line position
     bool exit = false;
-    string choice;
     char prodName[MAX_PRODUCT_NAME_SIZE];
     Product product;
-    Product tmp;
+
+    string choice; // for inputs
 
     while (!exit)
     {
         cout << "Select the Product you want to look at" << endl;
         cout << "+++++" << endl;
         cout << "Product:" << endl;
-        for (int i=0; i < 20; i++){
-            if (!productFile.getNextProduct(product)) break;
+        for (unsigned int i=0; i < 20; i++){
+            if (!productFile.getNextProduct(product)) break; // no more products to print out
             counter++;
             product.getName(prodName);
-            cout << counter << ") " << prodName << endl;
+            cout << i++ << ") " << prodName << endl;
         }
         cout << "+++++" << endl;
         cout << "+++++" << endl;
@@ -729,31 +801,34 @@ void selectProduct(char* productName)
         if (is_number(choice))
         {
             int number = stoi(choice);
-            if (1 <= number && number <= counter)
+            if (1 <= number && number <= 20)
             {
-                // counter -= number;
+                counter = (counter/20) * 20 + number; //basically do integer division to see how many chunks of 20 have gone by, then multiply back 20 add the number to it to get position
                 productFile.seekToBeginningOfFile();
-                for (int i=0; i < number; i++)
+                for (unsigned int i=0; i<counter; i++)
                 {
-                    productFile.getNextProduct(tmp);
+                    productFile.getNextProduct(product);
                 }
-                tmp.getName(productName);
+                product.getName(productName);
                 exit = true;
             }
             else if (number == 0){
                 productName[0] = '\0'; //set as basically blank c string
                 exit = true;
-            } else {
-                cout << "Number input goes beyond the range, try again" << endl;
-                productFile.seekToBeginningOfFile();
-                counter = 0;
             }
+
+            cout << "Number input goes beyond the range, try again" << endl;
         }
         else if (choice == "P" || choice == "p")
         {
-            productFile.seekToBeginningOfFile();
-            counter -= counter;
-            for(int i=0; i < counter ; i++) { productFile.getNextProduct(product); }
+            productFile.seekToBeginningOfFile(); //set pointer to beginning first
+
+            if (counter <= 20) { counter = 0; } // if counter is 
+            else
+            {
+                counter -= 20;
+                for(unsigned int i=0; i < counter ; i++) { productFile.getNextProduct(product); }
+            }
         }
         else if (choice == "N" || choice == "n")
         {
@@ -761,9 +836,11 @@ void selectProduct(char* productName)
         }
         else
         {
-            cout << "Bad input detected, no product selected" << endl;
-            productName[0] = '\0';
-            break;
+            if (!formatMismatchError())
+            {
+                productName[0] = '\0'; // same as choosing to exit, set first element to null
+                exit = true; //leave the function
+            }
         }
     }
 }
@@ -776,10 +853,10 @@ void selectChangeItem(char* product, int &chngID)
 {
     if (!changeItemFile.seekToBeginningOfFile()) //seek first
     {
-        cerr << "Unable to find product (cant seek to beginning)" << endl;
+        cerr << "Unable to find change item (cant seek to beginning)" << endl;
     }
     
-    int counter = 0; //file line position
+    unsigned int counter = 0; //file line position
     bool exit = false;
     string choice;
     char prodName[MAX_PRODUCT_NAME_SIZE];
@@ -797,7 +874,7 @@ void selectChangeItem(char* product, int &chngID)
         cout << "+++++" << endl;
         cout << "   Change ID" << left << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
             << setw(WIDTH) << "Priority" << setw(WIDTH) << "Anticipated Release" << endl;
-        for (int i=0; i < 20;){
+        for (unsigned int i=0; i < 20;){
             if (!changeItemFile.getNextChangeItem(changeItem)) break; //get the next item, if eof then stop and break out of the loop
             changeItem.getProductName(prodName);
             if (prodName == product)
@@ -825,11 +902,11 @@ void selectChangeItem(char* product, int &chngID)
         if (is_number(choice)) //decisions on what to do based on choice
         {
             int number = stoi(choice);
-            if (1 <= number  && number <= 20)
+            if (1 <= number && number <= 20)
             {
-                counter -= number;
+                counter = (counter/20) * 20 + number;
                 changeItemFile.seekToBeginningOfFile();
-                for (int i=0; i<counter; i++)
+                for (unsigned int i=0; i<counter; i++)
                 {
                     changeItemFile.getNextChangeItem(changeItem);
                 }
@@ -846,8 +923,13 @@ void selectChangeItem(char* product, int &chngID)
         else if (choice == "P" || choice == "p")
         {
             changeItemFile.seekToBeginningOfFile();
-            counter -= 20;
-            for(int i=0; i < counter ; i++) { changeItemFile.getNextChangeItem(changeItem); }
+
+            if (counter <= 20) { counter = 0; }
+            else
+            {
+                counter -= 20;
+                for(unsigned int i=0; i < counter ; i++) { changeItemFile.getNextChangeItem(changeItem); }
+            }
         }
         else if (choice == "N" || choice == "n")
         {
@@ -855,9 +937,10 @@ void selectChangeItem(char* product, int &chngID)
         }
         else
         {
-            cout << "Bad input detected, no Change Item will be selected" << endl;
-            chngID = -1;
-            break;
+            if (!formatMismatchError()){
+                chngID = -1;
+                exit = true;
+            }
         }
     }
 }
