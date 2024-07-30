@@ -9,8 +9,8 @@ main: main.cpp
 UI: UI.h UI.cpp
 	g++ -Wall -Wpedantic -std=c++17 -c UI.cpp
 
-ScenarioControl: Product.h Product.cpp
-	g++ -Wall -Wpedantic -std=c++17 -c Product.cpp
+ScenarioControl: ScenarioControl.h ScenarioControl.cpp
+	g++ -Wall -Wpedantic -std=c++17 -c ScenarioControl.cpp
 
 Product: Product.h Product.cpp
 	g++ -Wall -Wpedantic -std=c++17 -c Product.cpp
