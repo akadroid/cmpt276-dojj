@@ -165,7 +165,7 @@ void addChangeReq()
 
         switch (choice)
         {
-            case 'Y':
+            case 'Y': {
                 Customer customer(name, email, phoneNum);
                 if (!customerFile.findCustomer(name, customer))
                 {
@@ -186,12 +186,15 @@ void addChangeReq()
                     exitCustomer = true;
                 }
                 break;
-            case 'N':
+            }
+            case 'N': {
                 cout << "The customer is not added to the system" << endl;
                 return; // just exit the option at this point
-            default:
+            }
+            default: {
                 if (!formatMismatchError()) return;
                 break;
+            }
         }
     } while(exitCustomer);
 
@@ -248,7 +251,7 @@ void addChangeReq()
 
             switch (choice)
             {
-                case 'Y':
+                case 'Y': {
                     ChangeItem toAddChItem(productName, releaseID, description, "Reported", priority);
                     changeID = toAddChItem.getChangeID();
                     if (changeItemFile.createChangeItem(toAddChItem))
@@ -275,12 +278,15 @@ void addChangeReq()
                         return;
                     }  
                     break;
-                case 'N':
+                }
+                case 'N': {
                     cout << "The change request was not added, returning to main menu.." << endl;
                     return;
-                default:
+                }
+                default: {
                     if (!formatMismatchError()) return;
                     break;
+                }
             }
         } while (exitConf);
     }
@@ -309,7 +315,7 @@ void addProduct()
 {
     cout << "What is the name of the Product? (Max 10 Char.)" << endl;
     char productName[MAX_PRODUCT_NAME_SIZE];
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    
     cin.getline(productName, MAX_PRODUCT_NAME_SIZE);
 
     cout << "Would you like to confirm adding " << productName << " as a product? (Y/N)" << endl;
@@ -330,6 +336,7 @@ void addProduct()
         break;
     case 'N':
         cout << "The product was not added" << endl;
+        break;
     default:
         cout << "Bad output detected, product was not added" << endl;
         break;
@@ -695,7 +702,7 @@ void listChangeItemsReport()
 
 //*******************************************************//
 
-void listCustomerStaffReport()
+void listCustomersStaffReport()
 {
     char productName[MAX_PRODUCT_NAME_SIZE];
     char customerName[MAX_NAME_SIZE];
