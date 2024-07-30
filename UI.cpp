@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include "UI.h"
+#include "ScenarioControl.h"
 using namespace std;
 
 //*******************************************************//
