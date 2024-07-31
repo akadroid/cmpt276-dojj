@@ -71,13 +71,11 @@ bool is_number(const std::string& s)
 
 void strtControl()
 {
-    productFile = strtProduct();
-    customerFile = strtCustomer();
-    changeItemFile = strtItem();
-    changeRequestFile = strtChangeReq();
-    productReleaseFile = strtRelease();
-    Customer balls;
-    cout << createCustomer(balls, customerFile) << endl;
+    // productFile = strtProduct();
+    // customerFile = strtCustomer();
+    // changeItemFile = strtItem();
+    // changeRequestFile = strtChangeReq();
+    // productReleaseFile = strtRelease();
 }
 
 //*******************************************************//
@@ -193,7 +191,7 @@ void addChangeReq()
                 break;
             }
         }
-    } while(exitCustomer);
+    } while(!exitCustomer);
 
     // select the product
     selectProduct(productName);

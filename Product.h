@@ -52,7 +52,6 @@ private:
 
 class ProductFile : public BinaryFileIOHelper<Product>
 {
-
 public:
     ProductFile();
     Product findProduct(char *searchName);
