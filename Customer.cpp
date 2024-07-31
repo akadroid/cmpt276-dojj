@@ -101,21 +101,25 @@ Customer CustomerFile::findCustomer(char *customerName)
 { 
   // if we are unable to start the file, throw an error
   Customer emptyCustomer = Customer();
+
   if (!seekToBeginningOfFile())
   {
     cerr << "Unable to find customer (cant seek to beginning)" << endl;
     return emptyCustomer;
   }
-// variable associated with the search
+
+  // variable associated with the search
   Customer buf;
   streampos pos;
+  char fileCustomerName[31] = "";
+
   //while look is used for the search untill we find the customer or reach end
   //increment per customer in binary record file
   while (!file.eof())
   {
     // get the next customer in search
     getNextCustomer(buf);
-    char fileCustomerName[31] = "";
+    
     buf.getCustomerName(fileCustomerName);
     //if the name matches return the customer
     if (strcmp(fileCustomerName, customerName) == 0)

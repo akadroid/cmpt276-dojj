@@ -52,20 +52,20 @@ private:
 
 class CustomerFile : public BinaryFileIOHelper<Customer>
 {
-private:
-    fstream file;
-    bool writeCustomer(Customer customerObj);
 public:
-
+    // Constructor
     CustomerFile();
+
     Customer findCustomer(char *customerName);
     bool seekToBeginningOfFile();
     bool getNextCustomer(Customer &customerObj);
     bool createCustomer(Customer &adCustomer);
-  
 
     bool openCustomerFile();
     bool closeCustomerFile();
+
+private:
+    bool writeCustomer(Customer customerObj);
 };
 
 //******************************************************************************** */
