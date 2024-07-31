@@ -97,13 +97,14 @@ CustomerFile::CustomerFile()
 //while loop is used to look through the entire list of customers untill found.
 // or it reaches the end of the file.
 
-bool CustomerFile::findCustomer(char *customerName, Customer &name)
-{
+Customer CustomerFile::findCustomer(char *customerName)
+{ 
   // if we are unable to start the file, throw an error
+  Customer emptyCustomer = Customer();
   if (!seekToBeginningOfFile())
   {
-    cerr << "Unable to update customer (cant seek to beginning)" << endl;
-    return false;
+    cerr << "Unable to find customer (cant seek to beginning)" << endl;
+    return emptyCustomer;
   }
 // variable associated with the search
   Customer buf;
@@ -119,12 +120,13 @@ bool CustomerFile::findCustomer(char *customerName, Customer &name)
     //if the name matches return the customer
     if (strcmp(fileCustomerName, customerName) == 0)
     {
-      name = buf;
-      return true;
+      seekToBeginningOfFile();
+      return buf;
     }
   }
 // if no mach found, return false (no customer)
-  return false;
+  seekToBeginningOfFile();
+  return emptyCustomer;
 }
 
 //****************************************************************************************************************/
@@ -215,6 +217,33 @@ CustomerFile strtCustomer()
 {
   // CustomerFile.open("customer.txt", fstream::in | fstream::out | std::ios::app);
   return CustomerFile();
+}
+
+int createCustomer(Customer customerToAdd, CustomerFile &File) {
+    // Adds the customer to the end of the fixed-length binary record file
+
+    // Initalize local char arrays to check exceptions, and initalize return variable
+    char searchkey[31] = "";
+    char searchresult[31] = "";
+    int insertionresult = 1;
+
+    // Check to see if the product we are adding already exists
+    // by searching for it with a Product object
+    // Using local variables to perform this search
+    customerToAdd.getCustomerName(searchkey);
+    Customer searchCustomer = Customer();
+    searchCustomer = File.findCustomer(searchkey);
+    searchCustomer.getCustomerName(searchresult);
+
+    // If the Customer is a duplicate return a failed insertion
+    if (strcmp(searchresult, searchkey) == 0) {
+        return 0;
+    }
+
+    // Insert the customer and return wether the insertion was successful or not
+
+    insertionresult = File.createCustomer(customerToAdd);
+    return insertionresult;
 }
 
 //*************************************************** *********************************************************************/
