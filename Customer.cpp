@@ -1,4 +1,5 @@
 // Customer.cpp
+// Rev. 3 - 31/07/24 fixed creating a customer
 // Rev. 1 - 16/07/24 Original by D.O.J.J Software Development
 
 //********************************************************************************************************//
