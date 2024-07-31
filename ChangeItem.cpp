@@ -151,7 +151,7 @@ bool ChangeItemFile::findChangeItem(int id, ChangeItem &item)
 {
   if (!seekToBeginningOfFile())
   {
-    cerr << "Unable to update change item (cant seek to beginning)" << endl;
+    cerr << "Unable to find change item (cant seek to beginning)" << endl;
     return false;
   }
 
@@ -218,16 +218,26 @@ bool ChangeItemFile::updateChangeItem(ChangeItem &oldChangeItem, ChangeItem &new
     if (buf.getChangeID() == oldChangeItem.getChangeID())
     {
       // Get current read position and calculate the write position
-      pos = file.tellg();
-      file.seekg(pos - (streampos)sizeof(ChangeItem));
+      pos = file.tellg() - (streampos)sizeof(ChangeItem);
+
+      // Reset flags for file
+      closeChangeItemFile();
+      openChangeItemFileForModify();
+
+      // Seek to position to overwrite
+      file.seekg(pos, file.beg);
 
       if (Write(newChangeItem))
       {
+        closeChangeItemFile();
+        openChangeItemFile();
         return true;
       }
       else
       {
         cerr << "Error writing change item" << endl;
+        closeChangeItemFile();
+        openChangeItemFile();
         return false;
       }
     }
@@ -246,10 +256,6 @@ void ChangeItemFile::searchChangeItem(int changeId)
     cout << "Item does not exist" << endl;
   else
   {
-    // Display the header
-    cout << "Selected Change Item in Sierra2:\n";
-    cout << "  Change ID    Description      Status     Priority    Release ID\n";
-
     // Prepare to display the ChangeItem details
     char productName[11];
     char anticipatedRelease[9];
@@ -261,12 +267,21 @@ void ChangeItemFile::searchChangeItem(int changeId)
     buf.getDescription(description);
     buf.getStatus(state);
 
+    // Display the header
+    cout << "\n";
+    cout << "Selected Change Item in " << productName << ":\n";
+    cout << setw(12) << "Change ID" <<
+            setw(32) << "Description" <<
+            setw(12) << "Status" <<
+            setw(10) << "Priority" <<
+            setw(12) << "Release ID" << endl;
+
     // Display the details
-    cout << "  " << buf.getChangeID() << "            "
-         << description << "   "
-         << state << "   "
-         << buf.getPriority() << "           "
-         << anticipatedRelease << endl;
+    cout << setw(12)<< buf.getChangeID() <<
+            setw(32) << description <<
+            setw(12) << state <<
+            setw(10) << buf.getPriority() <<
+            setw(12) << anticipatedRelease << endl;
   }
 }
 
@@ -275,6 +290,19 @@ void ChangeItemFile::searchChangeItem(int changeId)
 bool ChangeItemFile::openChangeItemFile()
 {
   file.open("ChangeItems.data", ios::in | ios::out | ios::binary | ios::app);
+  if (!file.is_open())
+  {
+    cerr << "Error opening file" << endl;
+    return false;
+  }
+  return true;
+}
+
+//*******************************************************//
+
+bool ChangeItemFile::openChangeItemFileForModify()
+{
+  file.open("ChangeItems.data", ios::in | ios::out | ios::binary);
   if (!file.is_open())
   {
     cerr << "Error opening file" << endl;
