@@ -1027,7 +1027,21 @@ void selectProduct(char* productName)
         else if (choice == "P" || choice == "p")
         {
             productFile.seekToBeginningOfFile();
-            counter -= counter;
+
+            if (counter % 20 == 0) 
+            {
+                counter = counter - 40;
+            }
+            else
+            { 
+                counter = counter - (counter % 20);
+                counter = counter - 20;
+            }
+            if (counter < 0) 
+            {
+                counter = 0;
+            }
+
             for(int i=0; i < counter ; i++) { productFile.getNextProduct(product); }
         }
         else if (choice == "N" || choice == "n")
@@ -1125,12 +1139,22 @@ void selectChangeItem(char* product, int &chngID)
         {
             changeItemFile.seekToBeginningOfFile();
 
-            if (counter <= 20) { counter = 0; }
-            else
+            if (counter % 20 == 0) 
             {
-                counter -= 20;
-                for(unsigned int i=0; i < counter ; i++) { changeItemFile.getNextChangeItem(changeItem); }
+                counter = counter - 40;
             }
+            else
+            { 
+                counter = counter - (counter % 20);
+                counter = counter - 20;
+            }
+            if (counter < 0) 
+            {
+                counter = 0;
+            }
+
+            for(unsigned int i=0; i < counter ; i++) { changeItemFile.getNextChangeItem(changeItem); }
+            
         }
         else if (choice == "N" || choice == "n")
         {
