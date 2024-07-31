@@ -55,10 +55,6 @@ class ChangeRequest{
 //*********************************************************************//
 class ChangeRequestFile : public BinaryFileIOHelper<ChangeRequest>
 {
-private:
-    fstream file;
-    bool writeChangeRequest(ChangeRequest changeRequestObj);
-
 public:
 
     ChangeRequestFile();
@@ -69,6 +65,9 @@ public:
 
     bool openChangeRequestFile();
     bool closeChangeRequestFile();
+    
+private:
+    bool writeChangeRequest(ChangeRequest changeRequestObj);
 };
 
 //******************************************************************************** */

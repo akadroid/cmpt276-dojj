@@ -129,9 +129,11 @@ bool ChangeRequestFile::findChangeRequest(int id, ChangeRequest &request)
     cerr << "Unable to update change request (cant seek to beginning)" << endl;
     return false;
   }
-// variable associated with the search
+
+  // variable associated with the search
   ChangeRequest buf;
   streampos pos;
+
   // while look is used for the search untill we find the change request or reach end
   // increment per change request in binary record file
   while (!file.eof())
@@ -142,10 +144,13 @@ bool ChangeRequestFile::findChangeRequest(int id, ChangeRequest &request)
     if (buf.getRequestID() == id)
     {
       request = buf;
+      seekToBeginningOfFile();
       return true;
     }
   }
-// if no mach found, return false (no change request)
+  
+  // if no mach found, return false (no change request)
+  seekToBeginningOfFile();
   return false;
 }
 
