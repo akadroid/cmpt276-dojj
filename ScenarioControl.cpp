@@ -915,9 +915,9 @@ void listCustomersStaffReport()
                     }
                 }
 
-                toFind.setCustomerName(customerName); // the find customer only needs the first name on the object
-                toFind.setEmailAddress(customerEmail);
-                toFind.setPhoneNumber(customerPhone);
+                toFind.getCustomerName(customerName); // the find customer only needs the first name on the object
+                toFind.getPhoneNumber(customerPhone);
+                toFind.getEmailAddress(customerEmail);
 
                 cout << left << setw(WIDTH) << customerName << setw(WIDTH) << customerEmail << setw(WIDTH) << customerPhone << endl; 
             }
@@ -962,6 +962,7 @@ void listCustomersStaffReport()
             if (!formatMismatchError()) exit = true;
         }
     }
+    changeRequestFile.seekToBeginningOfFile();
 }
 
 
