@@ -168,15 +168,26 @@ void addChangeReq()
             case 'Y':
             {
                 Customer customer(name, email, phoneNum);
-                if(customerFile.createCustomer(customer))
-                {
-                    cout << "The customer is successfully added to the system!" << endl;
+
+                // Handle duplicates
+                char foundName[35];
+                Customer foundCustomer = customerFile.findCustomer(name);
+                foundCustomer.getCustomerName(foundName);
+
+                if (strcmp(name, foundName) != 0) {
+                    if(customerFile.createCustomer(customer))
+                    {
+                        cout << "The customer is successfully added to the system!" << endl;
+                        exitCustomer = true;
+                    }
+                    else
+                    {
+                        cout << "Failed to add customer to the system." << endl;
+                        return;
+                    }
+                } else {
+                    cout << "The user already exists. Continuing…" << endl;
                     exitCustomer = true;
-                }
-                else
-                {
-                    cout << "Failed to add customer to the system." << endl;
-                    return;
                 }
                 break;
             }
