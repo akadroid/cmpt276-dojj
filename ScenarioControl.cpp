@@ -1,5 +1,5 @@
 // ScenarioControl.cpp
-// Rev. 3 - (Add date) Fixed many glaring issues within the code such as error handling and general incorrect algorithms
+// Rev. 3 - 31/07/24 Modified just about every function to have it work as intended
 // Rev. 2 - 16/07/24 Added implementation of the functions to ScenarioControl.cpp
 
 //*******************************************************//
@@ -26,7 +26,7 @@ using namespace std;
 
 //*******************************************************//
 
-// global variables 
+// initialize global variables 
 ProductFile productFile;
 CustomerFile customerFile;
 ChangeItemFile changeItemFile;
@@ -259,15 +259,17 @@ void addChangeReq()
             {
                 case 'Y':
                 {
+                    // if Y, then we add the change item first, and if that works add the change request
                     ChangeItem toAddChItem(productName, releaseID, description, "Reported", priority);
                     changeID = toAddChItem.getChangeID();
-                    if (changeItemFile.createChangeItem(toAddChItem))
+                    if (changeItemFile.createChangeItem(toAddChItem)) //
                     {
                         cout << "The change ID for the change item is assigned as" 
-                            << changeID << "and the status is reported" << endl; //hard code because its default
+                            << changeID << "and the status is reported" << endl; //hard code because its default reported
 
+                        // if we were able to create the change item, then make the request
                         ChangeRequest toAddChReq(changeID, releaseID, name, date);
-                        if (changeRequestFile.createChangeRequest(toAddChReq))
+                        if (changeRequestFile.createChangeRequest(toAddChReq))  
                         {
                             cout << "The request that is assigned to " << changeID
                                 << " has been sent out to the system." << endl;
@@ -299,7 +301,7 @@ void addChangeReq()
             }
         } while (exitConf);
     }
-    else // in this case, a change item is selected and thus we can simply 
+    else // in this case, a change item is selected and thus we can simply make the request with the already known release id
     {
         ChangeRequest toAddChReq(changeID, releaseID, name, date);
         if(changeRequestFile.createChangeRequest(toAddChReq))
@@ -560,6 +562,7 @@ void addChangeItem()
 
     ChangeItem toAdd(productName, releaseID, description, status, priority);
 
+    //formatted output using left and setw
     cout << "Would you like to confirm adding this Change Item to the product " << productName << " (Y/N):" << endl;
     cout << left << setw(WIDTH) << "Change ID" << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
          << setw(WIDTH) << "Priority" << setw(WIDTH) << "Release ID" << endl;
@@ -567,6 +570,7 @@ void addChangeItem()
          << setw(WIDTH) << priority << setw(WIDTH) << releaseID << endl;
     
 
+    // choice selection
     char choice;
     cin >> choice;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -598,7 +602,6 @@ void modifyChangeItem()
     int changeID;
     ChangeItem changeItem;
     
-
     selectProduct(productName);
     if (productName[0] == '\0') return; // no product selected
 
@@ -618,6 +621,7 @@ void modifyChangeItem()
     priority = changeItem.getPriority();
     changeItem.getReleaseID(releaseID);
 
+    //formatted outputs
     cout << "\n";
     cout << "Select the attribute you would like to edit for the Change Item in " << productName << endl;
     cout << "+++++" << endl;
@@ -626,6 +630,7 @@ void modifyChangeItem()
     cout << left << setw(WIDTH) << changeID << setw(WIDTH) << description << setw(WIDTH) << status 
             << setw(WIDTH) << priority << setw(WIDTH) << releaseID << endl;
 
+    //selection and choices for edit
     bool selectionChoice = 0;
     while (selectionChoice == 0)
     {
@@ -820,6 +825,8 @@ void listChangeItemsReport()
         cout << "+++++" << endl;
         cout << left << setw(WIDTH) << "Change ID" << left << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
             << setw(WIDTH) << "Priority" << setw(WIDTH) << "Anticipated Release" << endl;
+        
+        // prints 20 of the change items at a time
         for (unsigned int i=0; i < 20;)
         {
             if (!changeItemFile.getNextChangeItem(changeItem)) break; // get next change item, but if read fails then break
@@ -847,7 +854,7 @@ void listChangeItemsReport()
         cout << "Press 0 to Return" << endl;
         cout << "+++++" << endl;
 
-        getline(cin, choice);
+        getline(cin, choice); // select an option based on the input choice
 
         if (is_number(choice))
         {
@@ -908,6 +915,8 @@ void listCustomersStaffReport()
         cout << "List of Customers/Staff to inform about implemented change:" << endl;
         cout << "+++++" << endl;
         cout << left << setw(WIDTH) << "Name" << setw(WIDTH) << "Email" << setw(WIDTH) << "Phone Number" << endl;
+
+        // display 20 of the customers that are linked to the change item
         for (unsigned int i=0; i < 20;){
             if (!changeRequestFile.getNextChangeRequest(changeRequest)) break; // get the next item, if eof then stop and break out of the loop
             int currentChangeID = changeRequest.getRequestID(); // hold the changeid of the request we are looking at
@@ -928,7 +937,8 @@ void listCustomersStaffReport()
                     }
                 }
 
-                toFind.getCustomerName(customerName); // the find customer only needs the first name on the object
+                // grab information
+                toFind.getCustomerName(customerName);
                 toFind.getPhoneNumber(customerPhone);
                 toFind.getEmailAddress(customerEmail);
 
@@ -944,7 +954,7 @@ void listCustomersStaffReport()
 
         string choice;
 
-        getline(cin, choice);
+        getline(cin, choice); // enter choice from options
 
         if (is_number(choice)) //decisions on what to do based on choice
         {
@@ -995,6 +1005,7 @@ void selectProduct(char* productName)
     Product product;
     Product tmp;
 
+    // loop for the selection process
     while (!exit)
     {
         cout << "\n";
@@ -1031,7 +1042,7 @@ void selectProduct(char* productName)
                 exit = true;
             }
             else if (number == 0){
-                productName[0] = '\0'; //set as basically blank c string
+                productName[0] = '\0'; //set as basically blank c when exiting without selecting 
                 exit = true;
             } else {
                 cout << "Number input goes beyond the range, try again" << endl;
@@ -1043,6 +1054,7 @@ void selectProduct(char* productName)
         {
             productFile.seekToBeginningOfFile();
 
+            // some conditions and arithmetic for going back to previous options
             if (counter % 20 == 0) 
             {
                 counter = counter - 40;
@@ -1103,6 +1115,7 @@ void selectChangeItem(char* product, int &chngID)
         cout << left << setw(10) << "No." << setw(WIDTH) << "Change ID" << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
             << setw(WIDTH) << "Priority" << setw(WIDTH) << "Anticipated Release" << endl;
 
+        // display 20 change items at a time for a product
         for (unsigned int i=0; i < 20;){
             if (!changeItemFile.getNextChangeItem(changeItem)) break; //get the next item, if not able to then break out of the for loop
             changeItem.getProductName(prodName);
@@ -1131,7 +1144,7 @@ void selectChangeItem(char* product, int &chngID)
         if (is_number(choice)) //decisions on what to do based on choice
         {
             int number = stoi(choice);
-            if (1 <= number && number <= 20)
+            if (1 <= number && number <= 20) //loop uses arithmetic to calculate the position of the selection
             {
                 counter = (counter/20) * 20 + number;
                 changeItemFile.seekToBeginningOfFile();
@@ -1156,6 +1169,7 @@ void selectChangeItem(char* product, int &chngID)
         {
             changeItemFile.seekToBeginningOfFile();
 
+            // some conditions and arithmetic for going back to previous options
             if (counter % 20 == 0) 
             {
                 counter = counter - 40;

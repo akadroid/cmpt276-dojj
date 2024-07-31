@@ -1,4 +1,5 @@
 // main.cpp
+// Rev. 3 - 31/07/24 commented out startControl as it does not actaully do anything
 // Rev. 2 - 17/07/24 Renamed main menu loop to activateUI
 // Rev. 1 - 03/07/24 Original by D.O.J.J Software Development
 
@@ -13,7 +14,7 @@ using namespace std;
 
 int main()
 {
-    strtControl();
+    //strtControl();
     activateUI();
     closeControl();
     return 0;

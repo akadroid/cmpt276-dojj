@@ -1,4 +1,5 @@
 // Customer.h
+// Rev. 3 - 31/07/24 fixed creating a customer
 // Rev. 2 - 17/07/24 Updated strings to be char arrays, included BinaryFileIOHelper
 // Rev. 1 - 03/07/24 Original by D.O.J.J Software Development
 
