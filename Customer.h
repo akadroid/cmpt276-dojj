@@ -52,20 +52,20 @@ private:
 
 class CustomerFile : public BinaryFileIOHelper<Customer>
 {
-private:
-    fstream file;
-    bool writeCustomer(Customer customerObj);
 public:
-
+    // Constructor
     CustomerFile();
-    bool findCustomer(char *customerName, Customer &name);
+
+    Customer findCustomer(char *customerName);
     bool seekToBeginningOfFile();
     bool getNextCustomer(Customer &customerObj);
     bool createCustomer(Customer &adCustomer);
-  
 
     bool openCustomerFile();
     bool closeCustomerFile();
+
+private:
+    bool writeCustomer(Customer customerObj);
 };
 
 //******************************************************************************** */
@@ -75,7 +75,16 @@ public:
 // Use createCustomer to add and save a given Customer object to customer.txt.
 ///***************************************************************************************/
 
+
 CustomerFile strtCustomer(); // starts the customer module
+int createCustomer(Customer customerToAdd, CustomerFile &File);
+// createCustomer is a function which takes a Customer object that is passed to it as a function argument
+// The function returns 0 for a successful operation, and -1 if there is an error
+// It is expected to have all attributes of a customer filled which is the name, phone number, email address
+// The function puts the Customer on disk and then returns, if the process is successful
+// The Customer should be valid and the Customer File should have room for a new Customer
+
+//*******************************************************//
 bool stopCustomer(CustomerFile &custFile); // stops the customer module
 
 

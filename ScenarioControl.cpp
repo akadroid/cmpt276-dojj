@@ -2,8 +2,6 @@
 // Rev. 3 - (Add date) Fixed many glaring issues within the code such as error handling and general incorrect algorithms
 // Rev. 2 - 16/07/24 Added implementation of the functions to ScenarioControl.cpp
 
-
-//editing notes: addchangeitem is almost finished, just work on the end part, fix select product and we should be good for the most part
 //*******************************************************//
 
 #include <iostream>
@@ -18,7 +16,7 @@ using namespace std;
 // Each macro also accounts for the new-line character
 #define MAX_NAME_SIZE 31
 #define MAX_PHONE_NUM_SIZE 11
-#define MAX_EMAIL_SIZE 24
+#define MAX_EMAIL_SIZE 25
 #define MAX_PRODUCT_NAME_SIZE 11
 #define MAX_RELEASEID_SIZE 9
 #define MAX_DATE_SIZE 11
@@ -51,7 +49,7 @@ bool formatMismatchError()
         getline(cin, choice);
         if (choice == "Y") { return true; } 
         else if (choice == "0") { return false; }
-        else { cout << "Please select an appropriate option from the menu" << endl; }
+        else { cout << "Please select an appropriate option from the menu." << endl; }
     } 
 }
 // This function serves as the UI when there is a format mismatch determined by the user.
@@ -60,9 +58,11 @@ bool formatMismatchError()
 
 //*******************************************************//
 
-bool is_number(const string& s) 
+bool is_number(const std::string& s)
 {
-    return !s.empty() && find_if(s.begin(), s.end(), [](unsigned char c){ return !isdigit(c); }) == s.end();
+    std::string::const_iterator it = s.begin();
+    while (it != s.end() && std::isdigit(*it)) ++it;
+    return !s.empty() && it == s.end();
 }
 // https://stackoverflow.com/questions/4654636/how-to-determine-if-a-string-is-a-number-with-c
 // Helper function to find if the string is a number or not
@@ -71,11 +71,11 @@ bool is_number(const string& s)
 
 void strtControl()
 {
-    productFile = strtProduct();
-    customerFile = strtCustomer();
-    changeItemFile = strtItem();
-    changeRequestFile = strtChangeReq();
-    productReleaseFile = strtRelease();
+    // productFile = strtProduct();
+    // customerFile = strtCustomer();
+    // changeItemFile = strtItem();
+    // changeRequestFile = strtChangeReq();
+    // productReleaseFile = strtRelease();
 }
 
 //*******************************************************//
@@ -165,38 +165,33 @@ void addChangeReq()
 
         switch (choice)
         {
-            case 'Y': {
+            case 'Y':
+            {
                 Customer customer(name, email, phoneNum);
-                if (!customerFile.findCustomer(name, customer))
+                if(customerFile.createCustomer(customer))
                 {
-                    if(customerFile.createCustomer(customer))
-                    {
-                        cout << "The customer is successfully added to the system!" << endl;
-                        exitCustomer = true;
-                    }
-                    else
-                    {
-                        cout << "Failed to add customer to the system." << endl;
-                        return;
-                    }
+                    cout << "The customer is successfully added to the system!" << endl;
+                    exitCustomer = true;
                 }
                 else
                 {
-                    cout << "The user already exists. Continuing.." << endl;
-                    exitCustomer = true;
+                    cout << "Failed to add customer to the system." << endl;
+                    return;
                 }
                 break;
             }
-            case 'N': {
+            case 'N':
+            {
                 cout << "The customer is not added to the system" << endl;
                 return; // just exit the option at this point
             }
-            default: {
+            default:
+            {
                 if (!formatMismatchError()) return;
                 break;
             }
         }
-    } while(exitCustomer);
+    } while(!exitCustomer);
 
     // select the product
     selectProduct(productName);
@@ -212,11 +207,11 @@ void addChangeReq()
         {
             cout << "Enter the description of the request:" << endl;
             getline(cin, temp);
-            if (temp.size() > MAX_DESCRIPTION_SIZE)
+            if (temp.size() > MAX_DESCRIPTION_SIZE - 1)
             {
                 if (!formatMismatchError()) return;
             }
-        } while(temp.size() > MAX_DESCRIPTION_SIZE);
+        } while(temp.size() > MAX_DESCRIPTION_SIZE - 1);
 
         strcpy(description, temp.c_str());
         
@@ -251,7 +246,8 @@ void addChangeReq()
 
             switch (choice)
             {
-                case 'Y': {
+                case 'Y':
+                {
                     ChangeItem toAddChItem(productName, releaseID, description, "Reported", priority);
                     changeID = toAddChItem.getChangeID();
                     if (changeItemFile.createChangeItem(toAddChItem))
@@ -279,11 +275,13 @@ void addChangeReq()
                     }  
                     break;
                 }
-                case 'N': {
+                case 'N':
+                {
                     cout << "The change request was not added, returning to main menu.." << endl;
                     return;
                 }
-                default: {
+                default:
+                {
                     if (!formatMismatchError()) return;
                     break;
                 }
@@ -313,34 +311,83 @@ void addChangeReq()
 // and perform required operation to add a product
 void addProduct()
 {
-    cout << "What is the name of the Product? (Max 10 Char.)" << endl;
+    string temp; // temporary string for error handling
     char productName[MAX_PRODUCT_NAME_SIZE];
-    
-    cin.getline(productName, MAX_PRODUCT_NAME_SIZE);
 
-    cout << "Would you like to confirm adding " << productName << " as a product? (Y/N)" << endl;
-    char choice;
-    cin >> choice;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-    Product toAdd(productName); // create temporary product
-
-    switch (choice)
+    // enter name of product
+    do
     {
-    case 'Y':
-        if(createProduct(toAdd, productFile) != 0) {
-            cout << "The product has been added successfully." << endl;
-        } else {
-            cout << "Duplicate product detected. The product was not added." << endl;
+        cout << "What is the name of the Product? (Max 10 Char.)" << endl;
+        getline(cin, temp);
+        if (temp.size() > MAX_PRODUCT_NAME_SIZE - 1) 
+        {
+            if (!formatMismatchError()) return;
         }
-        break;
-    case 'N':
-        cout << "The product was not added" << endl;
-        break;
-    default:
-        cout << "Bad output detected, product was not added" << endl;
-        break;
-    }
+    } while(temp.size() > MAX_PRODUCT_NAME_SIZE - 1);
+
+    strcpy(productName, temp.c_str()); //move string into product name char array
+
+    //confirm adding product
+    bool exitConfirm = false;
+    string choice;
+    char selection;
+    do
+    {
+        cout << "Would you like to confirm adding " << productName << " as a product? (Y/N)" << endl;
+        cin >> choice;
+
+        if (choice == "Y" || choice == "y")
+        {  
+            selection = 'Y';
+        }
+        else if (choice == "N" || choice == "n")
+        {
+            selection = 'N';
+        }
+        else
+        {
+            selection = 'f';
+        }
+
+        if (cin.fail())
+        {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            if (!formatMismatchError()) return;
+        }
+        else
+        {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+    
+
+        Product toAdd(productName); // create temporary product
+
+        switch (selection)
+        {
+            case 'Y':
+            {
+                if(createProduct(toAdd, productFile) != 0) {
+                    cout << "The product has been added successfully." << endl;
+                } else {
+                    cout << "Duplicate product detected. The product was not added." << endl;
+                }
+                exitConfirm = true;
+                break;
+            }
+            case 'N':
+            {
+                cout << "The product was not added." << endl;
+                exitConfirm = true;
+                break;
+            }
+            default:
+            {
+                cout << "Please select an appropriate option from the menu." << endl;
+                break;
+            }
+        }
+    } while (!exitConfirm);
 }
 
 //*******************************************************//
@@ -349,6 +396,7 @@ void addProduct()
 // and perform required operation to add a product release
 void addProductRelease()
 {
+    string temp;
     char productName[MAX_PRODUCT_NAME_SIZE];
     char releaseID[MAX_RELEASEID_SIZE];
     char releaseDate[MAX_DATE_SIZE];
@@ -357,17 +405,53 @@ void addProductRelease()
     selectProduct(productName);
     if (productName[0] == '\0') return; // no product was selected therefore exit function
 
-    cout << "What is the Release ID for this product (Max 8 Char.)" << endl;
-    cin.getline(releaseID, MAX_RELEASEID_SIZE);
+    // obtain release ID
+    do
+    {
+        cout << "What is the Release ID for this product (Max 8 Char.)" << endl;
+        getline(cin, temp);
+        if (temp.size() > MAX_RELEASEID_SIZE - 1)
+        {
+            if (!formatMismatchError()) return;
+        }
+    } while(temp.size() > MAX_RELEASEID_SIZE - 1);
     
-    cout << "What is the Release Date? (In form: YYYY-MM-DD)" << endl;
-    cin.getline(releaseDate, MAX_DATE_SIZE);
+    strcpy(releaseID, temp.c_str());
 
-    cout << "Would you like to confirm adding a Product Release with ID " << releaseID << " with Release Date "
-        << releaseDate << " for " << productName << "? (Y/N)" << endl;
+    // obtain release date
+    do
+    {
+        cout << "What is the Release Date? (In form: YYYY-MM-DD)" << endl;
+        getline(cin, temp);
+        if (temp.size() > MAX_DATE_SIZE - 1)
+        {
+            if (!formatMismatchError()) return;
+        }
+    } while (temp.size() > MAX_DATE_SIZE - 1);
+
+    strcpy(releaseDate, temp.c_str());
+    
+    //confirmation
+    bool exitConfirm = false;
     char choice;
-    cin >> choice;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    do
+    {
+        cout << "Would you like to confirm adding a Product Release with ID " << releaseID << " with Release Date "
+            << releaseDate << " for " << productName << "? (Y/N)" << endl;
+        cin >> choice;
+
+        if (cin.fail())
+        {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            if (!formatMismatchError()) return;
+        }
+        else
+        {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            exitConfirm = true;
+        }
+    } while(!exitConfirm);
 
     ProductRelease productRelease(productName, releaseID, releaseDate);
 
@@ -393,6 +477,7 @@ void addProductRelease()
 
 void addChangeItem()
 {
+    string temp;
     char productName[MAX_PRODUCT_NAME_SIZE];
     char releaseID[MAX_RELEASEID_SIZE];
     char description[MAX_DESCRIPTION_SIZE];
@@ -402,26 +487,73 @@ void addChangeItem()
     selectProduct(productName);
     if (productName[0] == '\0') return; // no product selected
 
-    cout << "What is the Release ID? (Max 8 Char.)" << endl;
-    cin.getline(releaseID, MAX_RELEASEID_SIZE);
-    
-    cout << "Write a description of the Change Item. (Max 30 Char.)" << endl;
-    cin.getline(description, MAX_DESCRIPTION_SIZE);
+    // get release id
+    do
+    {
+        cout << "What is the Release ID? (Max 8 Char.)" << endl;
+        getline(cin, temp);
+        if (temp.size() > MAX_RELEASEID_SIZE - 1)
+        {
+            if (!formatMismatchError()) return;
+        }
 
-    cout << "Status? (Reported, Assessed, Cancelled, In Progress, Done)" << endl;
-    cin.getline(status, MAX_STATUS_SIZE);
+    } while (temp.size() > MAX_RELEASEID_SIZE - 1);
+
+    strcpy(releaseID, temp.c_str());
     
-    cout << "Priority? (1 to 5, with 5 being the highest priority)" << endl;
-    cin >> priority;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    // get description
+    do
+    {
+        cout << "Write a description of the Change Item. (Max 30 Char.)" << endl;
+        getline(cin, temp);
+        if (temp.size() > MAX_DESCRIPTION_SIZE - 1)
+        {
+            if (!formatMismatchError()) return;
+        }
+    } while(temp.size() > MAX_DESCRIPTION_SIZE - 1);
+
+    strcpy(description, temp.c_str());
+
+    // get status
+    do
+    {
+        cout << "Status? (Reported, Assessed, Cancelled, In Progress, Done)" << endl;
+        getline(cin, temp);
+        if (temp.size() > MAX_STATUS_SIZE - 1)
+        {
+            if (!formatMismatchError()) return;
+        }
+    } while (temp.size() > MAX_STATUS_SIZE - 1);
+
+    strcpy(status, temp.c_str());
+
+    // get priority
+    bool exitPrio = false;
+    do
+    {
+        cout << "Priority? (1 to 5, with 5 being the highest priority)" << endl;
+        cin >> priority;
+
+        if(cin.fail() || priority < 1 || priority > 5)
+        {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            if (!formatMismatchError()) return;
+        }
+        else
+        {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
+            exitPrio = true;
+        }   
+    } while(!exitPrio);
 
     ChangeItem toAdd(productName, releaseID, description, status, priority);
 
     cout << "Would you like to confirm adding this Change Item to the product " << productName << " (Y/N):" << endl;
-    cout << "Change ID" << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
-            << setw(WIDTH) << "Priority" << setw(WIDTH) << "Release ID" << endl;
-     cout << toAdd.getChangeID() << left << setw(WIDTH) << description << setw(WIDTH) << status
-            << setw(WIDTH) << priority << setw(WIDTH) << releaseID << endl;
+    cout << left << setw(WIDTH) << "Change ID" << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
+         << setw(WIDTH) << "Priority" << setw(WIDTH) << "Release ID" << endl;
+    cout << left << setw(WIDTH) << toAdd.getChangeID() << setw(WIDTH) << description << setw(WIDTH) << status
+         << setw(WIDTH) << priority << setw(WIDTH) << releaseID << endl;
     
 
     char choice;
@@ -467,6 +599,7 @@ void modifyChangeItem()
     {
         changeItemFile.seekToBeginningOfFile();
         changeItemFile.getNextChangeItem(changeItem);
+        cout << "hello" << endl;
     }
 
     //update values
@@ -475,126 +608,159 @@ void modifyChangeItem()
     priority = changeItem.getPriority();
     changeItem.getReleaseID(releaseID);
 
-
-    cout << "Select the attribute you would like to edit for the Change Item in " << productName << endl;
-    cout << "+++++" << endl;
-    cout << "Change ID" << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
-            << setw(WIDTH) << "Priority" << setw(WIDTH) << "Release ID" << endl;
-    cout << changeID << setw(WIDTH) << description << setw(WIDTH) << status 
+    cout << left << setw(WIDTH) << "Change ID" << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
+         << setw(WIDTH) << "Priority" << setw(WIDTH) << "Release ID" << endl;
+    cout << left << setw(WIDTH) << changeID << setw(WIDTH) << description << setw(WIDTH) << status 
             << setw(WIDTH) << priority << setw(WIDTH) << releaseID << endl;
 
-    cout << "+++++" << endl;
-    cout << "+++++" << endl;
-    cout << "1) Edit Description" << endl;
-    cout << "2) Edit Status" << endl;
-    cout << "3) Edit Priority" << endl;
-    cout << "4) Edit Release ID" << endl;
-    cout << "0) Main Menu" << endl;
-    cout << "+++++";
-
-    int choice;
-    char choice2;
-    cin >> choice;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    switch (choice)
+    bool selectionChoice = 0;
+    while (selectionChoice == 0)
     {
-        case 1:
-        {
-            cout << "Enter the new description for this Change Item:" << endl;
-            cin.getline(description, MAX_DESCRIPTION_SIZE);
-            cout << "Are you sure you want to change the description to" << description << " ? (Y/N)" << endl;
-            cin >> choice2;
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "+++++" << endl;
+        cout << "+++++" << endl;
+        cout << "1) Edit Description" << endl;
+        cout << "2) Edit Status" << endl;
+        cout << "3) Edit Priority" << endl;
+        cout << "4) Edit Release ID" << endl;
+        cout << "0) Main Menu" << endl;
+        cout << "+++++" << endl;
 
-            ChangeItem updatedChangeItem(productName, releaseID, description, status, priority);
-            switch (choice2)
-            {
-                case 'Y':
-                    changeItemFile.updateChangeItem(changeItem, updatedChangeItem); // update on file
-                    cout << "The Change Item has been successfully updated" << endl; 
-                    break;
-                case 'N':
-                    cout << "The Change Item was not updated" << endl;
-                    break;
-                default:
-                    cout << "Bad input detected, no change was made" << endl;
-            }
-            break;
-        }    
-        case 2:
-        {
-            cout << "Enter the new status for this Change Item:" << endl;
-            cin.getline(status, MAX_STATUS_SIZE);
-            cout << "Are you sure you want to change the status to" << status << " ? (Y/N)" << endl;
-            cin >> choice2;
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        string userInput;
+        int choice;
+        char choice2;
+        cin >> userInput;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-            ChangeItem updatedChangeItem(productName, releaseID, description, status, priority);
-            switch (choice2)
-            {
-                case 'Y':
-                    changeItemFile.updateChangeItem(changeItem, updatedChangeItem); // update on file
-                    cout << "The Change Item has been successfully updated" << endl; 
-                    break;
-                case 'N':
-                    cout << "The Change Item was not updated" << endl;
-                    break;
-                default:
-                    cout << "Bad input detected, no change was made" << endl;
-            }
-            break;
+        if (userInput == "1") 
+        {
+            choice = 1;
+            selectionChoice = 1;
         }
-        case 3:
+        else if (userInput == "2")
         {
-            cout << "Enter the new priority for this Change Item:" << endl;
-            cin >> priority;
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Are you sure you want to change the priority to" << priority << " ? (Y/N)" << endl;
-            cin >> choice2;
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-            ChangeItem updatedChangeItem(productName, releaseID, description, status, priority);
-            switch (choice2)
-            {
-                case 'Y':
-                    changeItemFile.updateChangeItem(changeItem, updatedChangeItem); // update on file
-                    cout << "The Change Item has been successfully updated" << endl; 
-                    break;
-                case 'N':
-                    cout << "The Change Item was not updated" << endl;
-                    break;
-                default:
-                    cout << "Bad input detected, no change was made" << endl;
-            }
-            break;
+            choice = 2;
+            selectionChoice = 1;
         }
-        case 4:
+        else if (userInput == "3")
         {
-            cout << "Enter the new Release ID for this Change Item:" << endl;
-            cin.getline(releaseID, MAX_RELEASEID_SIZE);
-            cout << "Are you sure you want to change the Release ID to" << releaseID << " ? (Y/N)" << endl;
-            cin >> choice2;
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-            ChangeItem updatedChangeItem(productName, releaseID, description, status, priority);
-            switch (choice2)
-            {
-                case 'Y':
-                    changeItemFile.updateChangeItem(changeItem, updatedChangeItem); // update on file
-                    cout << "The Change Item has been successfully updated" << endl; 
-                    break;
-                case 'N':
-                    cout << "The Change Item was not updated" << endl;
-                    break;
-                default:
-                    cout << "Bad input detected, no change was made" << endl;
-            }
-            break;
+            choice = 3;
+            selectionChoice = 1;
         }
-        case 0:
-            break;
-        default:
-            cout << "Bad input detected, returning to menu" << endl;
+        else if (userInput == "4")
+        {
+            choice = 4;
+            selectionChoice = 1;
+        }
+        else if (userInput == "0")
+        {
+            choice = 0;
+            selectionChoice = 1;
+        }
+        else
+        {
+            choice = -1;
+        }
+
+        switch (choice)
+        {
+            case 1:
+            {
+                cout << "Enter the new description for this Change Item:" << endl;
+                cin.getline(description, MAX_DESCRIPTION_SIZE);
+                cout << "Are you sure you want to change the description to" << description << " ? (Y/N)" << endl;
+                cin >> choice2;
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                ChangeItem updatedChangeItem(productName, releaseID, description, status, priority);
+                switch (choice2)
+                {
+                    case 'Y':
+                        changeItemFile.updateChangeItem(changeItem, updatedChangeItem); // update on file
+                        cout << "The Change Item has been successfully updated" << endl; 
+                        break;
+                    case 'N':
+                        cout << "The Change Item was not updated" << endl;
+                        break;
+                    default:
+                        cout << "Bad input detected, no change was made" << endl;
+                }
+                break;
+            }    
+            case 2:
+            {
+                cout << "Enter the new status for this Change Item: (Reported, Assessed, Cancelled, In Progress, Done)" << endl;
+                cin.getline(status, MAX_STATUS_SIZE);
+                cout << "Are you sure you want to change the status to " << status << " ? (Y/N)" << endl;
+                cin >> choice2;
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                ChangeItem updatedChangeItem(productName, releaseID, description, status, priority);
+                switch (choice2)
+                {
+                    case 'Y':
+                        changeItemFile.updateChangeItem(changeItem, updatedChangeItem); // update on file
+                        cout << "The Change Item has been successfully updated" << endl; 
+                        break;
+                    case 'N':
+                        cout << "The Change Item was not updated" << endl;
+                        break;
+                    default:
+                        cout << "Bad input detected, no change was made" << endl;
+                }
+                break;
+            }
+            case 3:
+            {
+                cout << "Enter the new priority for this Change Item:" << endl;
+                cin >> priority;
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Are you sure you want to change the priority to" << priority << " ? (Y/N)" << endl;
+                cin >> choice2;
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                ChangeItem updatedChangeItem(productName, releaseID, description, status, priority);
+                switch (choice2)
+                {
+                    case 'Y':
+                        changeItemFile.updateChangeItem(changeItem, updatedChangeItem); // update on file
+                        cout << "The Change Item has been successfully updated" << endl; 
+                        break;
+                    case 'N':
+                        cout << "The Change Item was not updated" << endl;
+                        break;
+                    default:
+                        cout << "Bad input detected, no change was made" << endl;
+                }
+                break;
+            }
+            case 4:
+            {
+                cout << "Enter the new Release ID for this Change Item:" << endl;
+                cin.getline(releaseID, MAX_RELEASEID_SIZE);
+                cout << "Are you sure you want to change the Release ID to" << releaseID << " ? (Y/N)" << endl;
+                cin >> choice2;
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                ChangeItem updatedChangeItem(productName, releaseID, description, status, priority);
+                switch (choice2)
+                {
+                    case 'Y':
+                        changeItemFile.updateChangeItem(changeItem, updatedChangeItem); // update on file
+                        cout << "The Change Item has been successfully updated" << endl; 
+                        break;
+                    case 'N':
+                        cout << "The Change Item was not updated" << endl;
+                        break;
+                    default:
+                        cout << "Bad input detected, no change was made" << endl;
+                }
+                break;
+            }
+            case 0:
+                break;
+            default:
+                cout << "Please select an appropriate option from the menu." << endl;
+        }
     }
 }
 
@@ -639,7 +805,7 @@ void listChangeItemsReport()
     {
         cout << "List of Change Items for " << productName << " to implement:" << endl;
         cout << "+++++" << endl;
-        cout << "   Change ID" << left << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
+        cout << left << setw(WIDTH) << "Change ID" << left << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
             << setw(WIDTH) << "Priority" << setw(WIDTH) << "Anticipated Release" << endl;
         for (unsigned int i=0; i < 20;)
         {
@@ -648,7 +814,8 @@ void listChangeItemsReport()
             char currentStatus[MAX_STATUS_SIZE];
             changeItem.getProductName(currentProduct);
             changeItem.getStatus(currentStatus);
-            if (productName == currentProduct && currentStatus != "Done" && currentStatus != "Cancelled")
+            //if (productName == currentProduct && currentStatus != "Done" && currentStatus != "Cancelled")
+            if (strcmp(productName, currentProduct) == 0 && strcmp(currentStatus, "Done") != 0 && strcmp(currentStatus, "Cancelled") != 0)
             {
                 i++;
                 changeID = changeItem.getChangeID();
@@ -656,7 +823,8 @@ void listChangeItemsReport()
                 changeItem.getStatus(status);
                 changeItem.getReleaseID(releaseID);
                 priority = changeItem.getPriority();
-                cout << i << ") " << changeID << setw(WIDTH) << description << setw(WIDTH) << status 
+
+                cout << left << setw(WIDTH) << changeID << setw(WIDTH) << description << setw(WIDTH) << status 
                     << setw(WIDTH) << priority << setw(WIDTH) << releaseID << endl;
             }
         }
@@ -671,7 +839,7 @@ void listChangeItemsReport()
         if (is_number(choice))
         {
             int number = stoi(choice);
-            if (number == 0){ exit = true; }
+            if (number == 0) { exit = true; }
             else
             {
                 cout << "Number input goes beyond the range, try again" << endl;
@@ -706,6 +874,8 @@ void listCustomersStaffReport()
 {
     char productName[MAX_PRODUCT_NAME_SIZE];
     char customerName[MAX_NAME_SIZE];
+    char customerEmail[MAX_EMAIL_SIZE];
+    char customerPhone[MAX_PHONE_NUM_SIZE];
     int changeID;
     unsigned int counter;
     ChangeRequest changeRequest;
@@ -719,22 +889,37 @@ void listCustomersStaffReport()
 
     bool exit = false;
     changeRequestFile.seekToBeginningOfFile();
+    customerFile.seekToBeginningOfFile();
     while (!exit)
     {
         cout << "List of Customers/Staff to inform about implemented change:" << endl;
         cout << "+++++" << endl;
-        cout << "Name" << setw(WIDTH) << "Email" << setw(WIDTH) << "Phone Number" << endl;
+        cout << left << setw(WIDTH) << "Name" << setw(WIDTH) << "Email" << setw(WIDTH) << "Phone Number" << endl;
         for (unsigned int i=0; i < 20;){
-            if (!changeRequestFile.getNextChangeRequest(changeRequest)) break; //get the next item, if eof then stop and break out of the loop
-            int currentChangeID = changeRequest.getRequestID(); //naming conflict but this is the change id
-            if (changeID == currentChangeID)
+            if (!changeRequestFile.getNextChangeRequest(changeRequest)) break; // get the next item, if eof then stop and break out of the loop
+            int currentChangeID = changeRequest.getRequestID(); // hold the changeid of the request we are looking at
+            if (changeID == currentChangeID) // if the request id match
             {
                 i++;
+                changeRequest.getCustomerName(customerName); //get the customer's name
                 
-                changeRequest.getCustomerName(customerName);
-                toFind.setCustomerName(customerName); // the find customer only needs the first name on the object
-                customerFile.findCustomer(customerName, toFind);
-                cout << customerName; 
+                bool exitLoop = false;
+                while(!exitLoop)
+                {
+                    customerFile.getNextCustomer(toFind);
+                    char tempname[MAX_NAME_SIZE];
+                    toFind.getCustomerName(tempname);
+                    if(strcmp(customerName, tempname) == 0)
+                    {
+                        exitLoop = true;
+                    }
+                }
+
+                toFind.getCustomerName(customerName); // the find customer only needs the first name on the object
+                toFind.getPhoneNumber(customerPhone);
+                toFind.getEmailAddress(customerEmail);
+
+                cout << left << setw(WIDTH) << customerName << setw(WIDTH) << customerEmail << setw(WIDTH) << customerPhone << endl; 
             }
         }
         cout << "+++++" << endl;
@@ -767,8 +952,7 @@ void listCustomersStaffReport()
                 counter -= 20;
                 for(int i=0; i < counter ; i++) { changeRequestFile.getNextChangeRequest(changeRequest); }
             }
-        }
-            
+        }        
         else if (choice == "N" || choice == "n")
         {
             // dont do anything
@@ -778,6 +962,7 @@ void listCustomersStaffReport()
             if (!formatMismatchError()) exit = true;
         }
     }
+    changeRequestFile.seekToBeginningOfFile();
 }
 
 
@@ -859,8 +1044,6 @@ void selectProduct(char* productName)
     }
 }
 
-//This function looks to provide the user interface options when selecting we have to select a product
-
 
 //This function looks to provide the user interface options when selecting we have to select a product
 
@@ -874,7 +1057,6 @@ void selectChangeItem(char* product, int &chngID)
     }
     
     unsigned int counter = 0; //file line position
-    bool exit = false;
     string choice;
     char prodName[MAX_PRODUCT_NAME_SIZE];
     ChangeItem changeItem;
@@ -885,16 +1067,17 @@ void selectChangeItem(char* product, int &chngID)
     int prio;
     
 
-    while (!exit)
+    while (true)
     {
-        cout << "Given below are existing change items for" << product << endl;
+        cout << "Given below are existing change items for " << product << endl;
         cout << "+++++" << endl;
-        cout << "   Change ID" << left << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
+        cout << left << setw(10) << "No." << setw(WIDTH) << "Change ID" << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
             << setw(WIDTH) << "Priority" << setw(WIDTH) << "Anticipated Release" << endl;
+
         for (unsigned int i=0; i < 20;){
-            if (!changeItemFile.getNextChangeItem(changeItem)) break; //get the next item, if eof then stop and break out of the loop
+            if (!changeItemFile.getNextChangeItem(changeItem)) break; //get the next item, if not able to then break out of the for loop
             changeItem.getProductName(prodName);
-            if (prodName == product)
+            if (strcmp(prodName, product) == 0)
             {
                 i++;
                 changeID = changeItem.getChangeID();
@@ -902,7 +1085,7 @@ void selectChangeItem(char* product, int &chngID)
                 changeItem.getStatus(status);
                 changeItem.getReleaseID(antiRelease);
                 prio = changeItem.getPriority();
-                cout << i << ") " << changeID << setw(WIDTH) << description << setw(WIDTH) << status 
+                cout << left << setw(10) << to_string(i) + ") " << setw(WIDTH) << changeID << setw(WIDTH) << description << setw(WIDTH) << status 
                     << setw(WIDTH) << prio << setw(WIDTH) << antiRelease << endl;
             }
             
@@ -927,15 +1110,17 @@ void selectChangeItem(char* product, int &chngID)
                 {
                     changeItemFile.getNextChangeItem(changeItem);
                 }
-                changeID = changeItem.getChangeID(); //when selecting the right one replace the chngID
-                exit = true;
+                chngID = changeItem.getChangeID(); //when selecting the right one replace the chngID
+                return;
             }
             else if (number == 0){
-                changeID = -1; //if none was selected, put -1 to let user know
-                exit = true;
+                chngID = -1; //if none was selected, put -1 to let user know
+                return;
             }
-
-            cout << "Number input goes beyond the range, try again" << endl;
+            else
+            {
+                cout << "Number input goes beyond the range, try again" << endl;
+            }
         }
         else if (choice == "P" || choice == "p")
         {
@@ -956,7 +1141,7 @@ void selectChangeItem(char* product, int &chngID)
         {
             if (!formatMismatchError()){
                 chngID = -1;
-                exit = true;
+                return;
             }
         }
     }

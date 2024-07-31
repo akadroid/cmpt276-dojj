@@ -11,7 +11,6 @@
 
 #ifndef SCENARIO_CONTROL_H
 #define SCENARIO_CONTROL_H
-#include <string.h>
 #include "ChangeItem.h"
 #include "ChangeRequest.h"
 #include "Customer.h"
