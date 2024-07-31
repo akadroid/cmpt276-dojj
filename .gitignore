@@ -1,5 +1,7 @@
 .vscode
 *.dSYM
+*.o
+*.exe
 a.out
 *.data
 *.txt

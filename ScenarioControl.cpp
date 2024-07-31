@@ -807,7 +807,7 @@ void listChangeItemsReport()
     {
         cout << "List of Change Items for " << productName << " to implement:" << endl;
         cout << "+++++" << endl;
-        cout << left << "Change ID" << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
+        cout << left << setw(WIDTH) << "Change ID" << left << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
             << setw(WIDTH) << "Priority" << setw(WIDTH) << "Anticipated Release" << endl;
         for (unsigned int i=0; i < 20;)
         {
@@ -826,7 +826,7 @@ void listChangeItemsReport()
                 changeItem.getReleaseID(releaseID);
                 priority = changeItem.getPriority();
 
-                cout << i << ") " << changeID << left << setw(WIDTH) << description << setw(WIDTH) << status 
+                cout << left << setw(WIDTH) << changeID << setw(WIDTH) << description << setw(WIDTH) << status 
                     << setw(WIDTH) << priority << setw(WIDTH) << releaseID << endl;
             }
         }
@@ -876,6 +876,8 @@ void listCustomersStaffReport()
 {
     char productName[MAX_PRODUCT_NAME_SIZE];
     char customerName[MAX_NAME_SIZE];
+    char customerEmail[MAX_EMAIL_SIZE];
+    char customerPhone[MAX_PHONE_NUM_SIZE];
     int changeID;
     unsigned int counter;
     ChangeRequest changeRequest;
@@ -889,22 +891,37 @@ void listCustomersStaffReport()
 
     bool exit = false;
     changeRequestFile.seekToBeginningOfFile();
+    customerFile.seekToBeginningOfFile();
     while (!exit)
     {
         cout << "List of Customers/Staff to inform about implemented change:" << endl;
         cout << "+++++" << endl;
-        cout << "Name" << setw(WIDTH) << "Email" << setw(WIDTH) << "Phone Number" << endl;
+        cout << left << setw(WIDTH) << "Name" << setw(WIDTH) << "Email" << setw(WIDTH) << "Phone Number" << endl;
         for (unsigned int i=0; i < 20;){
-            if (!changeRequestFile.getNextChangeRequest(changeRequest)) break; //get the next item, if eof then stop and break out of the loop
-            int currentChangeID = changeRequest.getRequestID(); //naming conflict but this is the change id
-            if (changeID == currentChangeID)
+            if (!changeRequestFile.getNextChangeRequest(changeRequest)) break; // get the next item, if eof then stop and break out of the loop
+            int currentChangeID = changeRequest.getRequestID(); // hold the changeid of the request we are looking at
+            if (changeID == currentChangeID) // if the request id match
             {
                 i++;
+                changeRequest.getCustomerName(customerName); //get the customer's name
                 
-                changeRequest.getCustomerName(customerName);
-                toFind.setCustomerName(customerName); // the find customer only needs the first name on the object
-                // customerFile.findCustomer(customerName, toFind);
-                cout << customerName; 
+                bool exitLoop = false;
+                while(!exitLoop)
+                {
+                    customerFile.getNextCustomer(toFind);
+                    char tempname[MAX_NAME_SIZE];
+                    toFind.getCustomerName(tempname);
+                    if(strcmp(customerName, tempname) == 0)
+                    {
+                        exitLoop = true;
+                    }
+                }
+
+                toFind.getCustomerName(customerName); // the find customer only needs the first name on the object
+                toFind.getPhoneNumber(customerPhone);
+                toFind.getEmailAddress(customerEmail);
+
+                cout << left << setw(WIDTH) << customerName << setw(WIDTH) << customerEmail << setw(WIDTH) << customerPhone << endl; 
             }
         }
         cout << "+++++" << endl;
@@ -937,8 +954,7 @@ void listCustomersStaffReport()
                 counter -= 20;
                 for(int i=0; i < counter ; i++) { changeRequestFile.getNextChangeRequest(changeRequest); }
             }
-        }
-            
+        }        
         else if (choice == "N" || choice == "n")
         {
             // dont do anything
@@ -948,6 +964,7 @@ void listCustomersStaffReport()
             if (!formatMismatchError()) exit = true;
         }
     }
+    changeRequestFile.seekToBeginningOfFile();
 }
 
 
@@ -1030,8 +1047,6 @@ void selectProduct(char* productName)
     }
 }
 
-//This function looks to provide the user interface options when selecting we have to select a product
-
 
 //This function looks to provide the user interface options when selecting we have to select a product
 
@@ -1060,7 +1075,7 @@ void selectChangeItem(char* product, int &chngID)
         cout << "\n";
         cout << "Given below are existing change items for " << product << endl;
         cout << "+++++" << endl;
-        cout << left << setw(3) << " "  << setw(WIDTH) << "Change ID" << left << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
+        cout << left << setw(10) << "No." << setw(WIDTH) << "Change ID" << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
             << setw(WIDTH) << "Priority" << setw(WIDTH) << "Anticipated Release" << endl;
 
         for (unsigned int i=0; i < 20;){
@@ -1074,7 +1089,7 @@ void selectChangeItem(char* product, int &chngID)
                 changeItem.getStatus(status);
                 changeItem.getReleaseID(antiRelease);
                 prio = changeItem.getPriority();
-                cout << setw(4) << left << setw(1) << to_string(i) + ") " << setw(WIDTH) << changeID << setw(WIDTH) << description << setw(WIDTH) << status 
+                cout << left << setw(10) << to_string(i) + ") " << setw(WIDTH) << changeID << setw(WIDTH) << description << setw(WIDTH) << status 
                     << setw(WIDTH) << prio << setw(WIDTH) << antiRelease << endl;
             }
             
@@ -1099,8 +1114,8 @@ void selectChangeItem(char* product, int &chngID)
                 {
                     changeItemFile.getNextChangeItem(changeItem);
                 }
-                changeID = changeItem.getChangeID(); //when selecting the right one replace the chngID
-                chngID = changeID;
+
+                chngID = changeItem.getChangeID(); //when selecting the right one replace the chngID
                 return;
             }
             else if (number == 0){
