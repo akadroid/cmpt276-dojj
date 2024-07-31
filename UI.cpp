@@ -233,7 +233,7 @@ void changeReqSubMenu()
     while (selectionStatus == 0)
     {
 
-        cout << "+++++++ Change Reqeuests +++++++" << endl;
+        cout << "+++++++ Change Requests +++++++" << endl;
         cout << "Select an Option Below (0 to 1):" << endl;
         cout << "1) Add a Request" << endl;
         cout << "0) Return to the Main Menu" << endl;
