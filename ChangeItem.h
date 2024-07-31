@@ -38,7 +38,7 @@ public:
     // Constructor
     ChangeItem(const char *name, const char *rID, const char *desc, const char *state, int prio);
 
-    // Manually add a change id (for testing purposes)
+    // Manually add a change id
     ChangeItem(int cID, const char *name, const char *rID, const char *desc, const char *state, int prio);
 
     // Getters
@@ -85,6 +85,7 @@ public:
     void searchChangeItem(int changeId);
 
     bool openChangeItemFile();
+    bool openChangeItemFileForModify();
     bool closeChangeItemFile();
 
 private:

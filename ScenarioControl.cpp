@@ -595,11 +595,10 @@ void modifyChangeItem()
     if (changeID == -1) return; //did not select a change item
 
     //obtain changeitem first
+    changeItemFile.seekToBeginningOfFile();
     while(changeItem.getChangeID() != changeID)
     {
-        changeItemFile.seekToBeginningOfFile();
         changeItemFile.getNextChangeItem(changeItem);
-        cout << "hello" << endl;
     }
 
     //update values
@@ -608,6 +607,9 @@ void modifyChangeItem()
     priority = changeItem.getPriority();
     changeItem.getReleaseID(releaseID);
 
+    cout << "\n";
+    cout << "Select the attribute you would like to edit for the Change Item in " << productName << endl;
+    cout << "+++++" << endl;
     cout << left << setw(WIDTH) << "Change ID" << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
          << setw(WIDTH) << "Priority" << setw(WIDTH) << "Release ID" << endl;
     cout << left << setw(WIDTH) << changeID << setw(WIDTH) << description << setw(WIDTH) << status 
@@ -667,11 +669,11 @@ void modifyChangeItem()
             {
                 cout << "Enter the new description for this Change Item:" << endl;
                 cin.getline(description, MAX_DESCRIPTION_SIZE);
-                cout << "Are you sure you want to change the description to" << description << " ? (Y/N)" << endl;
+                cout << "Are you sure you want to change the description to " << description << "? (Y/N)" << endl;
                 cin >> choice2;
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-                ChangeItem updatedChangeItem(productName, releaseID, description, status, priority);
+                ChangeItem updatedChangeItem(changeID, productName, releaseID, description, status, priority);
                 switch (choice2)
                 {
                     case 'Y':
@@ -737,11 +739,11 @@ void modifyChangeItem()
             {
                 cout << "Enter the new Release ID for this Change Item:" << endl;
                 cin.getline(releaseID, MAX_RELEASEID_SIZE);
-                cout << "Are you sure you want to change the Release ID to" << releaseID << " ? (Y/N)" << endl;
+                cout << "Are you sure you want to change the Release ID to " << releaseID << " ? (Y/N)" << endl;
                 cin >> choice2;
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-                ChangeItem updatedChangeItem(productName, releaseID, description, status, priority);
+                ChangeItem updatedChangeItem(changeID, productName, releaseID, description, status, priority);
                 switch (choice2)
                 {
                     case 'Y':
@@ -967,6 +969,7 @@ void selectProduct(char* productName)
 
     while (!exit)
     {
+        cout << "\n";
         cout << "Select the Product you want to look at" << endl;
         cout << "+++++" << endl;
         cout << "Product:" << endl;
@@ -1054,9 +1057,10 @@ void selectChangeItem(char* product, int &chngID)
 
     while (true)
     {
-        cout << "Given below are existing change items for" << product << endl;
+        cout << "\n";
+        cout << "Given below are existing change items for " << product << endl;
         cout << "+++++" << endl;
-        cout << left << setw(WIDTH) << "Change ID" << left << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
+        cout << left << setw(3) << " "  << setw(WIDTH) << "Change ID" << left << setw(WIDTH) << "Description" << setw(WIDTH) << "Status" 
             << setw(WIDTH) << "Priority" << setw(WIDTH) << "Anticipated Release" << endl;
 
         for (unsigned int i=0; i < 20;){
@@ -1070,7 +1074,7 @@ void selectChangeItem(char* product, int &chngID)
                 changeItem.getStatus(status);
                 changeItem.getReleaseID(antiRelease);
                 prio = changeItem.getPriority();
-                cout << left << setw(1) << to_string(i) + ") " << setw(WIDTH) << changeID << setw(WIDTH) << description << setw(WIDTH) << status 
+                cout << setw(4) << left << setw(1) << to_string(i) + ") " << setw(WIDTH) << changeID << setw(WIDTH) << description << setw(WIDTH) << status 
                     << setw(WIDTH) << prio << setw(WIDTH) << antiRelease << endl;
             }
             
@@ -1096,10 +1100,11 @@ void selectChangeItem(char* product, int &chngID)
                     changeItemFile.getNextChangeItem(changeItem);
                 }
                 changeID = changeItem.getChangeID(); //when selecting the right one replace the chngID
+                chngID = changeID;
                 return;
             }
             else if (number == 0){
-                changeID = -1; //if none was selected, put -1 to let user know
+                chngID = -1; //if none was selected, put -1 to let user know
                 return;
             }
             else
