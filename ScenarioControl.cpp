@@ -712,7 +712,7 @@ void modifyChangeItem()
                 cin >> choice2;
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-                ChangeItem updatedChangeItem(changeID, productName, releaseID, description, status, priority);
+                ChangeItem updatedChangeItem(productName, releaseID, description, status, priority);
                 switch (choice2)
                 {
                     case 'Y':
@@ -732,11 +732,11 @@ void modifyChangeItem()
                 cout << "Enter the new priority for this Change Item:" << endl;
                 cin >> priority;
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cout << "Are you sure you want to change the priority to " << priority << " ? (Y/N)" << endl;
+                cout << "Are you sure you want to change the priority to" << priority << " ? (Y/N)" << endl;
                 cin >> choice2;
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-                ChangeItem updatedChangeItem(changeID, productName, releaseID, description, status, priority);
+                ChangeItem updatedChangeItem(productName, releaseID, description, status, priority);
                 switch (choice2)
                 {
                     case 'Y':
@@ -1148,7 +1148,7 @@ void selectChangeItem(char* product, int &chngID)
             {
                 counter = (counter/20) * 20 + number;
                 changeItemFile.seekToBeginningOfFile();
-                for (unsigned int i=0; i<=counter; i++)
+                for (unsigned int i=0; i<counter; i++)
                 {
                     changeItemFile.getNextChangeItem(changeItem);
                 }
