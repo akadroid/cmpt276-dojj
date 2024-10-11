@@ -212,8 +212,9 @@ void addChangeReq()
     selectChangeItem(productName, changeID);
 
     if(changeID == -1) //if the user does not select a change item, attempt to create one
-    {   
-        // enter description
+    {
+        return;
+        // enter description of the request
         do
         {
             cout << "Enter the description of the request:" << endl;
@@ -530,7 +531,7 @@ void addChangeItem()
     // get status
     do
     {
-        cout << "Status? (Reported, Assessed, Cancelled, In Progress, Done)" << endl;
+        cout << "Status? (Reported, Assessed, Cancelled, InProgress, Done)" << endl;
         getline(cin, temp);
         if (temp.size() > MAX_STATUS_SIZE - 1)
         {
@@ -706,7 +707,7 @@ void modifyChangeItem()
             }    
             case 2:
             {
-                cout << "Enter the new status for this Change Item: (Reported, Assessed, Cancelled, In Progress, Done)" << endl;
+                cout << "Enter the new status for this Change Item: (Reported, Assessed, Cancelled, InProgress, Done)" << endl;
                 cin.getline(status, MAX_STATUS_SIZE);
                 cout << "Are you sure you want to change the status to " << status << " ? (Y/N)" << endl;
                 cin >> choice2;
@@ -849,10 +850,12 @@ void listChangeItemsReport()
             }
         }
         cout << "+++++" << endl;
-        cout << "Press P for the previous 20 Products" << endl;
-        cout << "Press N for the next 20 Products" << endl;
-        cout << "Press 0 to Return" << endl;
+        cout << "Press P for the previous 20 Change Items" << endl;
+        cout << "Press N for the next 20 Change Items" << endl;
+        cout << "Press 0 to Return to the Main Menu" << endl;
         cout << "+++++" << endl;
+
+        changeItemFile.seekToBeginningOfFile();
 
         getline(cin, choice); // select an option based on the input choice
 
@@ -912,6 +915,7 @@ void listCustomersStaffReport()
     customerFile.seekToBeginningOfFile();
     while (!exit)
     {
+        cout << "\n";
         cout << "List of Customers/Staff to inform about implemented change:" << endl;
         cout << "+++++" << endl;
         cout << left << setw(WIDTH) << "Name" << setw(WIDTH) << "Email" << setw(WIDTH) << "Phone Number" << endl;
@@ -947,9 +951,9 @@ void listCustomersStaffReport()
         }
         cout << "+++++" << endl;
         cout << "+++++" << endl;
-        cout << "Press P for the previous 20 Products" << endl;
-        cout << "Press N for the next 20 Products" << endl;
-        cout << "Press 0 to Return" << endl;
+        cout << "Press P for the previous 20 Customers/Staff" << endl;
+        cout << "Press N for the next 20 Customers/Staff" << endl;
+        cout << "Press 0 to Return to the Main Menu" << endl;
         cout << "+++++" << endl;
 
         string choice;
@@ -1022,7 +1026,7 @@ void selectProduct(char* productName)
         cout << "+++++" << endl;
         cout << "Press P for the previous 20 Products" << endl;
         cout << "Press N for the next 20 Products" << endl;
-        cout << "Press 0 to Return" << endl;
+        cout << "Press 0 to Return to the Main Menu" << endl;
         cout << "+++++" << endl;
 
         getline(cin, choice);
@@ -1106,6 +1110,7 @@ void selectChangeItem(char* product, int &chngID)
     int changeID;
     int prio;
     
+    int changeids[20];
 
     while (true)
     {
@@ -1129,14 +1134,16 @@ void selectChangeItem(char* product, int &chngID)
                 prio = changeItem.getPriority();
                 cout << left << setw(10) << to_string(i) + ") " << setw(WIDTH) << changeID << setw(WIDTH) << description << setw(WIDTH) << status 
                     << setw(WIDTH) << prio << setw(WIDTH) << antiRelease << endl;
+
+                changeids[i] = changeID;
             }
             
         }
         cout << "+++++" << endl;
         cout << "+++++" << endl;
-        cout << "Press P for the previous 20 Products" << endl;
-        cout << "Press N for the next 20 Products" << endl;
-        cout << "Press 0 to Return" << endl;
+        cout << "Press P for the previous 20 Change Items" << endl;
+        cout << "Press N for the next 20 Change Items" << endl;
+        cout << "Press 0 to Return to the Main Menu" << endl;
         cout << "+++++" << endl;
 
         getline(cin, choice);
@@ -1148,12 +1155,13 @@ void selectChangeItem(char* product, int &chngID)
             {
                 counter = (counter/20) * 20 + number;
                 changeItemFile.seekToBeginningOfFile();
-                for (unsigned int i=0; i<counter; i++)
+                for (unsigned int i=0; i<=counter; i++)
                 {
                     changeItemFile.getNextChangeItem(changeItem);
                 }
 
-                chngID = changeItem.getChangeID(); //when selecting the right one replace the chngID
+                // chngID = changeItem.getChangeID(); //when selecting the right one replace the chngID
+                chngID = changeids[counter];
                 return;
             }
             else if (number == 0){
